@@ -15,15 +15,15 @@ public class Interpreter {
                            " e.g. (+ (* 3 100) (/ 84 (- 279 277))) \n" + 
                            "Press Ctrl + C to exit.");
         Reader reader = new Reader();
-        Evaluator eval = new Evaluator();
-        Printer printer = new Printer();
-        REPL: while (true) { // Read-Eval-Print-Loop (also known as REPL)
-            Program p = null;
+        ConcreteEvaluator eval = new ConcreteEvaluator();
+        SignEvaluator sign_eval = new SignEvaluator();
+        while (true) { // Read-Eval-Print-Loop (also known as REPL)
+            Program p;
             try {
                 p = reader.read();
-                if(p._e == null) continue REPL;
-                Value val = eval.valueOf(p);
-                printer.print(val);
+                if(p._e == null) continue;
+                SignValue val = sign_eval.valueOf(p);
+                System.out.println(val.toString());
             } catch (IOException e) {
                 System.out.println("Error reading input:" + e.getMessage());
             } catch (NullPointerException e) {

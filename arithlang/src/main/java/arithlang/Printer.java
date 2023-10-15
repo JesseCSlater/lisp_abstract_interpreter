@@ -3,7 +3,7 @@ package arithlang;
 import static arithlang.AST.*;
 
 public class Printer {
-    public void print(Value v) {
+    public void print(ConcreteValue v) {
         System.out.println(v.toString());
     }
 	
@@ -14,7 +14,7 @@ public class Printer {
         }
 		
         public String visit(NumExp e) {
-            return "" + e.v();
+            return e.toString();
         }
 		
         public String visit(AddExp e) {

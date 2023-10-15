@@ -1,9 +1,11 @@
 package arithlang;
 
-public interface Value {
-    public String toString();
-    static class NumVal implements Value {
-        private double _val;
+import java.util.Objects;
+
+public interface ConcreteValue {
+    String toString();
+    static class NumVal implements ConcreteValue {
+        private final double _val;
         public NumVal(double v) { _val = v; } 
         public double v() { return _val; }
         public String toString() { 
@@ -13,8 +15,8 @@ public interface Value {
         }
     }
 
-    static class DynamicError implements Value {
-        private String _errorMsg;
+    class DynamicError implements ConcreteValue {
+        private final String _errorMsg;
         public DynamicError(String v) {
             _errorMsg = v;
         }
@@ -22,9 +24,7 @@ public interface Value {
             return _errorMsg;
         }
         public String toString() {
-            String tmp = _errorMsg;
-            if (tmp == _errorMsg) return "" + tmp;
-            return "" + _errorMsg;
+            return _errorMsg;
         }
     }
 }
