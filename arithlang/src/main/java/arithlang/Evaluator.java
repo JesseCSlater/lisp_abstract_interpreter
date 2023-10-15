@@ -18,8 +18,13 @@ public class Evaluator implements Visitor<Value> {
         List<Exp> operands = e.all();
         double result = 0;
         for(Exp exp: operands) {
-            NumVal intermediate = (NumVal) exp.accept(this); // Dynamic type-checking
-            result += intermediate.v(); //Semantics of AddExp in terms of the target language.
+            Object val = exp.accept(this);
+            if (val instanceof NumVal) {
+                result += ((NumVal) val).v(); //Semantics of AddExp in terms of the target language
+            }
+            else if (val instanceof DynamicError) {
+                return (DynamicError) val;
+            }
         }
         return new NumVal(result);
     }
@@ -32,14 +37,21 @@ public class Evaluator implements Visitor<Value> {
     @Override
     public Value visit(DivExp e) {
         List<Exp> operands = e.all();
-        NumVal lVal = (NumVal) operands.get(0).accept(this);
-        double result = lVal.v(); 
+        Object lVal = operands.get(0).accept(this);
+        double result;
+        if (lVal instanceof NumVal) {
+            result = ((NumVal) lVal).v(); //Semantics of AddExp in terms of the target language
+        }
+        else return (DynamicError) lVal;
         for(int i=1; i<operands.size(); i++) {
-            NumVal rVal = (NumVal) operands.get(i).accept(this);
-            if (rVal.v() == 0) {
-                return new DynamicError(ts.visit(e));
-            }
-            result = result / rVal.v();
+            Object rVal = operands.get(i).accept(this);
+            if (rVal instanceof NumVal) {
+                double intermediate = ((NumVal) rVal).v();
+                if (intermediate == 0) {
+                    return new DynamicError("Error: Division by zero at: " + ts.visit(e));
+                }
+                result = result / intermediate;            }
+            else return (DynamicError) rVal;
         }
         return new NumVal(result);
     }
@@ -49,8 +61,11 @@ public class Evaluator implements Visitor<Value> {
         List<Exp> operands = e.all();
         double result = 1;
         for(Exp exp: operands) {
-            NumVal intermediate = (NumVal) exp.accept(this); // Dynamic type-checking
-            result *= intermediate.v(); //Semantics of MultExp.
+            Object val = exp.accept(this);
+            if (val instanceof NumVal) {
+                result *= ((NumVal) val).v(); //Semantics of AddExp in terms of the target language
+            }
+            else return (DynamicError) val;
         }
         return new NumVal(result);
     }
@@ -63,11 +78,18 @@ public class Evaluator implements Visitor<Value> {
     @Override
     public Value visit(SubExp e) {
         List<Exp> operands = e.all();
-        NumVal lVal = (NumVal) operands.get(0).accept(this);
-        double result = lVal.v();
+        Object lVal = operands.get(0).accept(this);
+        double result;
+        if (lVal instanceof NumVal) {
+            result = ((NumVal) lVal).v(); //Semantics of AddExp in terms of the target language
+        }
+        else return (DynamicError) lVal;
         for(int i=1; i<operands.size(); i++) {
-            NumVal rVal = (NumVal) operands.get(i).accept(this);
-            result = result - rVal.v();
+            Object rVal = operands.get(i).accept(this);
+            if (rVal instanceof NumVal) {
+                result = result - ((NumVal) rVal).v(); //Semantics of AddExp in terms of the target language
+            }
+            else return (DynamicError) rVal;
         }
         return new NumVal(result);
     }
