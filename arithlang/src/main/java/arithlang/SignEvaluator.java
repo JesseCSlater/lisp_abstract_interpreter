@@ -53,8 +53,8 @@ public class SignEvaluator implements Visitor<SignValue> {
                 (s1, s2) -> {
                     HashSet<Sign> ret = new HashSet<>();
                     if (s1 == Sign.None || s2 == Sign.None) ret.add(Sign.None);
-                    else if (s1 == Sign.Zero) ret.add(Sign.Zero);
                     else if (s2 == Sign.Zero) ret.add(Sign.None);
+                    else if (s1 == Sign.Zero) ret.add(Sign.Zero);
                     else if (s1 == s2) ret.add(Sign.Positive);
                     else ret.add(Sign.Negative);
                     return ret;

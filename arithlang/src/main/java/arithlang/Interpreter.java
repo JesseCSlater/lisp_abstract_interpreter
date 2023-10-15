@@ -17,13 +17,16 @@ public class Interpreter {
         Reader reader = new Reader();
         ConcreteEvaluator eval = new ConcreteEvaluator();
         SignEvaluator sign_eval = new SignEvaluator();
+        Printer printer = new Printer();
         while (true) { // Read-Eval-Print-Loop (also known as REPL)
             Program p;
             try {
                 p = reader.read();
                 if(p._e == null) continue;
-                SignValue val = sign_eval.valueOf(p);
-                System.out.println(val.toString());
+                ConcreteValue val = eval.valueOf(p);
+                SignValue sign_val = sign_eval.valueOf(p);
+                printer.print(val);
+                System.out.println(sign_val.toString());
             } catch (IOException e) {
                 System.out.println("Error reading input:" + e.getMessage());
             } catch (NullPointerException e) {
