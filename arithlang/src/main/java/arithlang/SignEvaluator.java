@@ -6,6 +6,16 @@ import java.util.List;
 import static arithlang.AST.*;
 import static arithlang.SignValue.Sign;
 
+
+//This class implements the abstract semantics for the sign abstract domain.
+//We use the visitor pattern, so we must implement Visitor<T> interface (defined in AST) to do our abstract evaluation.
+//For each type of node in the AST, we define an overload of the Visit function which computes the value of that node.
+//If the AST node is a function, then it will have a .all() function which will provide a list of it's child nodes.
+//To evaluate each of these nodes, use exp.accept(this). The reason you have to use this roundabout way of calling the
+// .accept method is to get dynamic dispatch.
+//For each visit method on an operation, you should write a lambda function which takes two values in the abstract
+//domain, and returns the _Value set of all possible values from applying the operation to those two. Then use the
+//_Value.combine function to combine two _Value set into another _Value set. Check the comment on .combine
 public class SignEvaluator implements Visitor<SignValue> {
 
     SignValue valueOf(Program p) {

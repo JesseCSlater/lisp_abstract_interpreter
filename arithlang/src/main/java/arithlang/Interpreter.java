@@ -16,6 +16,7 @@ public class Interpreter {
                            "Press Ctrl + C to exit.");
         Reader reader = new Reader();
         ConcreteEvaluator eval = new ConcreteEvaluator();
+        //Create a _Evaulator class for each type of abstract evaluation we do
         SignEvaluator sign_eval = new SignEvaluator();
         Printer printer = new Printer();
         while (true) { // Read-Eval-Print-Loop (also known as REPL)
@@ -24,7 +25,9 @@ public class Interpreter {
                 p = reader.read();
                 if(p._e == null) continue;
                 ConcreteValue val = eval.valueOf(p);
+                //Create a _Value class for each type of abstract evaluation we do
                 SignValue sign_val = sign_eval.valueOf(p);
+                //TODO fix bug in printer which causes divide by zero to print incorrectly
                 printer.print(val);
                 System.out.println(sign_val.toString());
             } catch (IOException e) {
