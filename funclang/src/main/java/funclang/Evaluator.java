@@ -23,11 +23,14 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(AddExp e, Env env) {
 		List<Exp> operands = e.all();
 		double result = 0;
+		SignValue result_sign = new SignValue();
 		for(Exp exp: operands) {
 			NumVal intermediate = (NumVal) exp.accept(this, env); // Dynamic type-checking
+			SignValue intermediate_sign = intermediate.getSignVal();
 			result += intermediate.v(); //Semantics of AddExp in terms of the target language.
+			result_sign.combineAdd(intermediate_sign);
 		}
-		return new NumVal(result);
+		return new NumVal(result, result_sign);
 	}
 
 	@Override
@@ -55,22 +58,28 @@ public class Evaluator implements Visitor<Value> {
 		List<Exp> operands = e.all();
 		NumVal lVal = (NumVal) operands.get(0).accept(this, env);
 		double result = lVal.v();
+		SignValue result_sign = lVal.getSignVal();
 		for(int i=1; i<operands.size(); i++) {
 			NumVal rVal = (NumVal) operands.get(i).accept(this, env);
+			SignValue intermediate_sign = rVal.getSignVal();
 			result = result / rVal.v();
+			result_sign.combineDiv(intermediate_sign);
 		}
-		return new NumVal(result);
+		return new NumVal(result, result_sign);
 	}
 
 	@Override
 	public Value visit(MultExp e, Env env) {
 		List<Exp> operands = e.all();
 		double result = 1;
+		SignValue result_sign = new SignValue();
 		for(Exp exp: operands) {
 			NumVal intermediate = (NumVal) exp.accept(this, env); // Dynamic type-checking
+			SignValue intermediate_sign = intermediate.getSignVal();
 			result *= intermediate.v(); //Semantics of MultExp.
+			result_sign.combineMult(intermediate_sign);
 		}
-		return new NumVal(result);
+		return new NumVal(result, result_sign);
 	}
 
 	@Override
@@ -89,11 +98,14 @@ public class Evaluator implements Visitor<Value> {
 		List<Exp> operands = e.all();
 		NumVal lVal = (NumVal) operands.get(0).accept(this, env);
 		double result = lVal.v();
+		SignValue result_sign = lVal.getSignVal();
 		for(int i=1; i<operands.size(); i++) {
 			NumVal rVal = (NumVal) operands.get(i).accept(this, env);
+			SignValue intermediate_sign = rVal.getSignVal();
 			result = result - rVal.v();
+			result_sign.combineSub(intermediate_sign);
 		}
-		return new NumVal(result);
+		return new NumVal(result, result_sign);
 	}
 
 	@Override

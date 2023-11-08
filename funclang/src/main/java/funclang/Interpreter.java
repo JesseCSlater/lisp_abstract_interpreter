@@ -27,6 +27,7 @@ public class Interpreter {
 				if(p._e == null) continue REPL;
 				Value val = eval.valueOf(p);
 				printer.print(val);
+				val.print();
 			} catch (Env.LookupException e) {
 				printer.print(e);
 			} catch (IOException e) {

@@ -6,6 +6,7 @@ import funclang.AST.Exp;
 
 public interface Value {
 	public String tostring();
+	public void print();
 	static class FunVal implements Value { //New in the funclang
 		private Env _env;
 		private List<String> _formals;
@@ -26,28 +27,58 @@ public interface Value {
 			result += _body.accept(new Printer.Formatter(), _env);
 			return result + ")";
 	    }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class NumVal implements Value {
 	    private double _val;
-	    public NumVal(double v) { _val = v; } 
+		private SignValue sign_val;
+
+	    public NumVal(double v) {
+			_val = v;
+			sign_val = new SignValue(v);
+		}
+
+		public NumVal(double v, SignValue sv) {
+			_val = v;
+			sign_val = sv;
+		}
+
 	    public double v() { return _val; }
+
+		public SignValue getSignVal() { return sign_val; }
+
 	    public String tostring() { 
 	    	int tmp = (int) _val;
 	    	if(tmp == _val) return "" + tmp;
 	    	return "" + _val; 
 	    }
+
+		public void print() {
+			System.out.println(sign_val.toString());
+		}
 	}
 	static class BoolVal implements Value {
 		private boolean _val;
 	    public BoolVal(boolean v) { _val = v; } 
 	    public boolean v() { return _val; }
 	    public String tostring() { if(_val) return "#t"; return "#f"; }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class StringVal implements Value {
 		private java.lang.String _val;
 	    public StringVal(String v) { _val = v; } 
 	    public String v() { return _val; }
 	    public java.lang.String tostring() { return "" + _val; }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class PairVal implements Value {
 		protected Value _fst;
@@ -92,18 +123,34 @@ public interface Value {
 	    	}
 	    	return result + ")";
 	    }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class Null implements Value {
 		public Null() {}
 	    public String tostring() { return "()"; }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class UnitVal implements Value {
 		public static final UnitVal v = new UnitVal();
 	    public String tostring() { return ""; }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 	static class DynamicError implements Value { 
 		private String message = "Unknown dynamic error.";
 		public DynamicError(String message) { this.message = message; }
 	    public String tostring() { return "" + message; }
+
+		public void print() {
+			System.out.println(this.tostring());
+		}
 	}
 }
