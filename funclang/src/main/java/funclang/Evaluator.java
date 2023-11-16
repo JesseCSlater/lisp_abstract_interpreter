@@ -13,7 +13,7 @@ public class Evaluator implements Visitor<Value> {
 
 	Printer.Formatter ts = new Printer.Formatter();
 
-	Env initEnv = initialEnv(); //New for definelang
+	Env initEnv = new GlobalEnv();
 
 	Value valueOf(Program p) {
 			return (Value) p.accept(this, initEnv);
@@ -363,7 +363,10 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(ReadExp e, Env env) {
 		StringVal fileName = (StringVal) e.file().accept(this, env);
 		try {
-			String text = Reader.readFile("" + System.getProperty("user.dir") + File.separator + fileName.v());
+			String text = Reader.readFile(
+					System.getProperty("user.dir")
+							+ "/funclang/src/main/java/funclang/examples/file.scm");
+							//+ fileName.v());
 			return new StringVal(text);
 		} catch (IOException ex) {
 			return new DynamicError(ex.getMessage());
@@ -371,25 +374,14 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	private Env initialEnv() {
-		GlobalEnv initEnv = new GlobalEnv();
+        return new GlobalEnv();
+	}
 
-		/* Procedure: (read <filename>). Following is same as (define read (lambda (file) (read file))) */
-		List<String> formals = new ArrayList<>();
-		formals.add("file");
-		Exp body = new AST.ReadExp(new VarExp("file"));
-		Value.FunVal readFun = new Value.FunVal(initEnv, formals, body);
-		initEnv.extend("read", readFun);
-
-		/* Procedure: (require <filename>). Following is same as (define require (lambda (file) (eval (read file)))) */
-		formals = new ArrayList<>();
-		formals.add("file");
-		body = new EvalExp(new AST.ReadExp(new VarExp("file")));
-		Value.FunVal requireFun = new Value.FunVal(initEnv, formals, body);
-		initEnv.extend("require", requireFun);
-
-		/* Add new built-in procedures here */
-
-		return initEnv;
+	public void setAbstractEnv(ArrayList<String> abstractEnv) {
+		initEnv = new GlobalEnv();
+		for (String s : abstractEnv) {
+			((GlobalEnv) initEnv).extend(s, new NumVal(2));
+		}
 	}
 
 	Reader _reader;

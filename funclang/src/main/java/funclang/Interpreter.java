@@ -1,5 +1,7 @@
 package funclang;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import funclang.Env;
 import funclang.Value;
@@ -20,11 +22,13 @@ public class Interpreter {
 		Reader reader = new Reader();
 		Evaluator eval = new Evaluator(reader);
 		Printer printer = new Printer();
-		REPL: while (true) { // Read-Eval-Print-Loop (also known as REPL)
+		while (true) { // Read-Eval-Print-Loop (also known as REPL)
 			Program p = null;
 			try {
-				p = reader.read();
-				if(p._e == null) continue REPL;
+				Reader.Ret read = reader.read();
+				p = read.p;
+				if(p._e == null) continue;
+				eval.setAbstractEnv(read.abstractEnv);
 				Value val = eval.valueOf(p);
 				printer.print(val);
 				val.print();
