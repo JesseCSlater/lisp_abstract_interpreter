@@ -1,5 +1,6 @@
 package funclang;
 
+import java.util.HashSet;
 import java.util.List;
 
 import funclang.AST.Exp;
@@ -7,6 +8,72 @@ import funclang.AST.Exp;
 public interface Value {
 	public String tostring();
 	public void print();
+	static class AbstractVal implements Value {
+		private HashSet<Val> _vals = new HashSet<>();
+
+		@Override
+		public String tostring() {
+			return _vals.toString();
+		}
+
+		@Override
+		public void print() {
+			System.out.println(this.tostring());
+		}
+
+		private enum Val {
+			TypeError,
+			UnsupportedFunctionError,
+			RuntimeError,
+			NumPos,
+			NumZero,
+			NumNeg,
+			BTrue,
+			BFalse;
+			public HashSet<Val> anyNum(){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(NumPos);
+				ret.add(NumZero);
+				ret.add(NumNeg);
+				return ret;
+			}
+			public HashSet<Val> anyBool(){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(BTrue);
+				ret.add(BFalse);
+				return ret;
+			}
+			public HashSet<Val> ofNum(double num){
+				HashSet<Val> ret = new HashSet<>();
+				if (num < 0) ret.add(NumNeg);
+				if (num > 0) ret.add(NumPos);
+				if (num == 0) ret.add(NumZero);
+				return ret;
+			}
+			public HashSet<Val> ofBool(boolean bool){
+				HashSet<Val> ret = new HashSet<>();
+				if (bool) ret.add(BTrue);
+				else ret.add(BFalse);
+				return ret;
+			}
+			public HashSet<Val> typeError(String s){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(TypeError);
+				return ret;
+			}
+			public HashSet<Val> unsupportedFunctionError(String s){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(UnsupportedFunctionError);
+				return ret;
+			}
+			public HashSet<Val> runtimeError(String s){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(RuntimeError);
+				return ret;
+			}
+		}
+	}
+
 	static class FunVal implements Value { //New in the funclang
 		private Env _env;
 		private List<String> _formals;
@@ -32,6 +99,7 @@ public interface Value {
 			System.out.println(this.tostring());
 		}
 	}
+
 	static class NumVal implements Value {
 	    private double _val;
 		private SignValue sign_val;

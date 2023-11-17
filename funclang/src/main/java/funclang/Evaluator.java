@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import funclang.Env.*;
 
@@ -21,16 +22,28 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(AddExp e, Env env) {
-		List<Exp> operands = e.all();
-		double result = 0;
-		SignValue result_sign = new SignValue();
-		for(Exp exp: operands) {
-			NumVal intermediate = (NumVal) exp.accept(this, env); // Dynamic type-checking
-			SignValue intermediate_sign = intermediate.getSignVal();
-			result += intermediate.v(); //Semantics of AddExp in terms of the target language.
-			result_sign.combineAdd(intermediate_sign);
+		List<Value> values = e.all()
+								.stream()
+								.map(
+										(x) -> (Value) x.accept(this, env)
+								)
+								.collect(Collectors.toList());
+		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//Handle abstract values here
+			return null;
 		}
-		return new NumVal(result, result_sign);
+		else {
+			//Handle concrete values here
+			double result = 0;
+			SignValue result_sign = new SignValue();
+			for (Value _val : values) {
+				NumVal val = (NumVal) _val; // Dynamic type-checking
+				SignValue intermediate_sign = val.getSignVal();
+				result += val.v(); //Semantics of AddExp in terms of the target language.
+				result_sign.combineAdd(intermediate_sign);
+			}
+			return new NumVal(result, result_sign);
+		}
 	}
 
 	@Override
