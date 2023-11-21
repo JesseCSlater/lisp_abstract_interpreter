@@ -26,6 +26,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//TODO
 			//Handle abstract values here
 			return null;
 		}
@@ -63,6 +64,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//TODO
 			//Handle abstract values here
 			return null;
 		}
@@ -80,6 +82,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//TODO
 			//Handle abstract values here
 			return null;
 		}
@@ -108,6 +111,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//TODO
 			//Handle abstract values here
 			return null;
 		}
@@ -180,6 +184,7 @@ public class Evaluator implements Visitor<Value> {
 		return (Value) operator.body().accept(this, fun_env);
 	}
 
+	//TODO abstract interpretation of if
 	@Override
 	public Value visit(IfExp e, Env env) { // New for funclang.
 		Object result = e.conditional().accept(this, env);
@@ -193,6 +198,7 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	public static boolean equalValue(Value v1, Value v2) {
+		//TODO Equals semantics for abstract domain
 		if (v1 instanceof NumVal && v2 instanceof NumVal) {
 			NumVal first = (NumVal) v1;
 			NumVal second = (NumVal) v2;
@@ -219,6 +225,7 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	public static int compareValue(Value v1, Value v2) {
+		//TODO write new compare function for abstract domain
 		if (equalValue(v1, v2)) {
 			return 0;
 		}
@@ -316,12 +323,14 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(val instanceof Value.Null);
 	}
 
+	//TODO add check if abstract num
 	@Override
 	public Value visit(IsNumExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
 		return new BoolVal(val instanceof Value.NumVal);
 	}
 
+	//TODO add check if abstract bool
 	@Override
 	public Value visit(IsBoolExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
@@ -334,7 +343,6 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(val instanceof Value.StringVal);
 	}
 
-	//TODO
 	@Override
 	public Value visit(IsProcedureExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
@@ -385,9 +393,6 @@ public class Evaluator implements Visitor<Value> {
 		}
 	}
 
-	private Env initialEnv() {
-        return new GlobalEnv();
-	}
 
 	public void setAbstractEnv(ArrayList<String> abstractEnv) {
 		initEnv = new GlobalEnv();
