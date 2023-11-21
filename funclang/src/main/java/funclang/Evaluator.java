@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import funclang.Env.*;
 
@@ -22,28 +23,19 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(AddExp e, Env env) {
-		List<Value> values = e.all()
-								.stream()
-								.map(
-										(x) -> (Value) x.accept(this, env)
-								)
-								.collect(Collectors.toList());
+		List<Value> values = Value.acceptAll(e.all(), this, env);
+
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
 			//Handle abstract values here
 			return null;
 		}
-		else {
-			//Handle concrete values here
-			double result = 0;
-			SignValue result_sign = new SignValue();
-			for (Value _val : values) {
-				NumVal val = (NumVal) _val; // Dynamic type-checking
-				SignValue intermediate_sign = val.getSignVal();
-				result += val.v(); //Semantics of AddExp in terms of the target language.
-				result_sign.combineAdd(intermediate_sign);
-			}
-			return new NumVal(result, result_sign);
+
+		double result = 0;
+		for (Value _val : values) {
+			NumVal val = (NumVal) _val; // Dynamic type -checking
+			result += val.v(); //Semantics of AddExp in terms of the target language.
 		}
+		return new NumVal(result);
 	}
 
 	@Override
@@ -68,31 +60,36 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(DivExp e, Env env) {
-		List<Exp> operands = e.all();
-		NumVal lVal = (NumVal) operands.get(0).accept(this, env);
-		double result = lVal.v();
-		SignValue result_sign = lVal.getSignVal();
-		for(int i=1; i<operands.size(); i++) {
-			NumVal rVal = (NumVal) operands.get(i).accept(this, env);
-			SignValue intermediate_sign = rVal.getSignVal();
-			result = result / rVal.v();
-			result_sign.combineDiv(intermediate_sign);
+		List<Value> values = Value.acceptAll(e.all(), this, env);
+
+		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//Handle abstract values here
+			return null;
 		}
-		return new NumVal(result, result_sign);
+
+		double result = ((NumVal) values.remove(0)).v();
+		for(Value _val: values) {
+			NumVal val = (NumVal) _val;
+			result = result / val.v();
+		}
+		return new NumVal(result);
 	}
 
 	@Override
 	public Value visit(MultExp e, Env env) {
-		List<Exp> operands = e.all();
-		double result = 1;
-		SignValue result_sign = new SignValue();
-		for(Exp exp: operands) {
-			NumVal intermediate = (NumVal) exp.accept(this, env); // Dynamic type-checking
-			SignValue intermediate_sign = intermediate.getSignVal();
-			result *= intermediate.v(); //Semantics of MultExp.
-			result_sign.combineMult(intermediate_sign);
+		List<Value> values = Value.acceptAll(e.all(), this, env);
+
+		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//Handle abstract values here
+			return null;
 		}
-		return new NumVal(result, result_sign);
+
+		double result = 1;
+		for(Value _val: values) {
+			NumVal val = (NumVal) _val;
+			result = result * val.v();
+		}
+		return new NumVal(result);
 	}
 
 	@Override
@@ -108,17 +105,19 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(SubExp e, Env env) {
-		List<Exp> operands = e.all();
-		NumVal lVal = (NumVal) operands.get(0).accept(this, env);
-		double result = lVal.v();
-		SignValue result_sign = lVal.getSignVal();
-		for(int i=1; i<operands.size(); i++) {
-			NumVal rVal = (NumVal) operands.get(i).accept(this, env);
-			SignValue intermediate_sign = rVal.getSignVal();
-			result = result - rVal.v();
-			result_sign.combineSub(intermediate_sign);
+		List<Value> values = Value.acceptAll(e.all(), this, env);
+
+		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			//Handle abstract values here
+			return null;
 		}
-		return new NumVal(result, result_sign);
+
+		double result = ((NumVal) values.remove(0)).v();
+		for(Value _val: values) {
+			NumVal val = (NumVal) _val;
+			result = result - val.v();
+		}
+		return new NumVal(result);
 	}
 
 	@Override

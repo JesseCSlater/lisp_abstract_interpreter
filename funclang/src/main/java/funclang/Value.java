@@ -2,12 +2,20 @@ package funclang;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import funclang.AST.Exp;
 
 public interface Value {
 	public String tostring();
 	public void print();
+	public static List<Value> acceptAll(List<AST.Exp> l, AST.Visitor<Value> t, Env env){
+		return l.stream().map(
+				(x) -> (Value) x.accept(t, env)
+		).collect(Collectors.toList());
+	}
+
 	static class AbstractVal implements Value {
 		private HashSet<Val> _vals = new HashSet<>();
 
@@ -24,6 +32,7 @@ public interface Value {
 		private enum Val {
 			TypeError,
 			UnsupportedFunctionError,
+			UnsupportedTypeError,
 			RuntimeError,
 			NumPos,
 			NumZero,
@@ -56,17 +65,22 @@ public interface Value {
 				else ret.add(BFalse);
 				return ret;
 			}
-			public HashSet<Val> typeError(String s){
+			public HashSet<Val> typeError(){
 				HashSet<Val> ret = new HashSet<>();
 				ret.add(TypeError);
 				return ret;
 			}
-			public HashSet<Val> unsupportedFunctionError(String s){
+			public HashSet<Val> unsupportedFunctionError(){
 				HashSet<Val> ret = new HashSet<>();
 				ret.add(UnsupportedFunctionError);
 				return ret;
 			}
-			public HashSet<Val> runtimeError(String s){
+			public HashSet<Val> unsupportedTypeError(){
+				HashSet<Val> ret = new HashSet<>();
+				ret.add(UnsupportedTypeError);
+				return ret;
+			}
+			public HashSet<Val> runtimeError(){
 				HashSet<Val> ret = new HashSet<>();
 				ret.add(RuntimeError);
 				return ret;
@@ -102,21 +116,12 @@ public interface Value {
 
 	static class NumVal implements Value {
 	    private double _val;
-		private SignValue sign_val;
 
 	    public NumVal(double v) {
 			_val = v;
-			sign_val = new SignValue(v);
-		}
-
-		public NumVal(double v, SignValue sv) {
-			_val = v;
-			sign_val = sv;
 		}
 
 	    public double v() { return _val; }
-
-		public SignValue getSignVal() { return sign_val; }
 
 	    public String tostring() { 
 	    	int tmp = (int) _val;
@@ -125,7 +130,7 @@ public interface Value {
 	    }
 
 		public void print() {
-			System.out.println(sign_val.toString());
+			System.out.println(_val);
 		}
 	}
 	static class BoolVal implements Value {
@@ -138,6 +143,7 @@ public interface Value {
 			System.out.println(this.tostring());
 		}
 	}
+
 	static class StringVal implements Value {
 		private java.lang.String _val;
 	    public StringVal(String v) { _val = v; } 

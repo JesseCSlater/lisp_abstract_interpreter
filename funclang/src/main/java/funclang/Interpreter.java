@@ -31,7 +31,6 @@ public class Interpreter {
 				eval.setAbstractEnv(read.abstractEnv);
 				Value val = eval.valueOf(p);
 				printer.print(val);
-				val.print();
 			} catch (Env.LookupException e) {
 				printer.print(e);
 			} catch (IOException e) {
