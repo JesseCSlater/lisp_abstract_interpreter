@@ -26,9 +26,24 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			//TODO
-			//Handle abstract values here
-			return null;
+			AbstractVal result = null;
+
+			for (Value _val : values) {
+				AbstractVal currentVal = null;
+				if (_val instanceof AbstractVal) {
+					currentVal = (AbstractVal) _val;
+				} else if (_val instanceof NumVal) {
+					currentVal = new AbstractVal(((NumVal) _val).v());
+				}
+
+				if (result == null) {
+					result = currentVal;
+				} else {
+					result.AbstractAdd(currentVal);
+				}
+			}
+
+			return result;
 		}
 
 		double result = 0;

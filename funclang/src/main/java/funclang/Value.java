@@ -19,6 +19,10 @@ public interface Value {
 	static class AbstractVal implements Value {
 		private HashSet<Val> _vals = new HashSet<>();
 
+		public AbstractVal(double num) {
+			_vals.addAll(Val.ofNum(num));
+		}
+
 		@Override
 		public String tostring() {
 			return _vals.toString();
@@ -27,6 +31,23 @@ public interface Value {
 		@Override
 		public void print() {
 			System.out.println(this.tostring());
+		}
+
+		public void AbstractAdd(AbstractVal addingVal) {
+			HashSet<Val> new_vals = new HashSet<>();
+			HashSet<Val> adding_vals = addingVal._vals;
+
+			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
+			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
+			if ((_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumNeg)) ||
+					(_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumPos))) new_vals.addAll(Val.anyNum());
+
+			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
+			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
+			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumZero);
+			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumPos);
+			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumNeg);
+
 		}
 
 		private enum Val {
@@ -39,7 +60,7 @@ public interface Value {
 			NumNeg,
 			BTrue,
 			BFalse;
-			public HashSet<Val> anyNum(){
+			public static HashSet<Val> anyNum(){
 				HashSet<Val> ret = new HashSet<>();
 				ret.add(NumPos);
 				ret.add(NumZero);
@@ -52,7 +73,7 @@ public interface Value {
 				ret.add(BFalse);
 				return ret;
 			}
-			public HashSet<Val> ofNum(double num){
+			public static HashSet<Val> ofNum(double num){
 				HashSet<Val> ret = new HashSet<>();
 				if (num < 0) ret.add(NumNeg);
 				if (num > 0) ret.add(NumPos);
