@@ -29,11 +29,11 @@ public class Evaluator implements Visitor<Value> {
 			AbstractVal result = null;
 
 			for (Value _val : values) {
-				AbstractVal currentVal = null;
+				AbstractVal currentVal;
 				if (_val instanceof AbstractVal) {
 					currentVal = (AbstractVal) _val;
-				} else if (_val instanceof NumVal) {
-					currentVal = new AbstractVal(((NumVal) _val).v());
+				} else {
+					currentVal = new AbstractVal(_val);
 				}
 
 				if (result == null) {

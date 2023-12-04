@@ -19,8 +19,14 @@ public interface Value {
 	static class AbstractVal implements Value {
 		private HashSet<Val> _vals = new HashSet<>();
 
-		public AbstractVal(double num) {
-			_vals.addAll(Val.ofNum(num));
+		public AbstractVal(Value value) {
+			if (value instanceof NumVal) {
+				_vals.addAll(Val.ofNum(((NumVal) value).v()));
+			} else if (value instanceof BoolVal) {
+				_vals.addAll(Val.ofBool(((BoolVal) value).v()));
+			} else {
+				_vals.add(Val.UnsupportedTypeError);
+			}
 		}
 
 		@Override
@@ -47,7 +53,8 @@ public interface Value {
 			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumZero);
 			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumPos);
 			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumNeg);
-
+			//TODO
+			//Handle undefined
 		}
 
 		private enum Val {
@@ -80,7 +87,7 @@ public interface Value {
 				if (num == 0) ret.add(NumZero);
 				return ret;
 			}
-			public HashSet<Val> ofBool(boolean bool){
+			public static HashSet<Val> ofBool(boolean bool){
 				HashSet<Val> ret = new HashSet<>();
 				if (bool) ret.add(BTrue);
 				else ret.add(BFalse);
