@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import funclang.abstractions.abstractNumVal;
 
 import funclang.AST.Exp;
 
@@ -14,106 +15,6 @@ public interface Value {
 		return l.stream().map(
 				(x) -> (Value) x.accept(t, env)
 		).collect(Collectors.toList());
-	}
-
-	static class AbstractVal implements Value {
-		private HashSet<Val> _vals = new HashSet<>();
-
-		public AbstractVal(Value value) {
-			if (value instanceof NumVal) {
-				_vals.addAll(Val.ofNum(((NumVal) value).v()));
-			} else if (value instanceof BoolVal) {
-				_vals.addAll(Val.ofBool(((BoolVal) value).v()));
-			} else {
-				_vals.add(Val.UnsupportedTypeError);
-			}
-		}
-
-		@Override
-		public String tostring() {
-			return _vals.toString();
-		}
-
-		@Override
-		public void print() {
-			System.out.println(this.tostring());
-		}
-
-		public void AbstractAdd(AbstractVal addingVal) {
-			HashSet<Val> new_vals = new HashSet<>();
-			HashSet<Val> adding_vals = addingVal._vals;
-
-			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
-			if ((_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumNeg)) ||
-					(_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumPos))) new_vals.addAll(Val.anyNum());
-
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumZero);
-			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumNeg);
-			//TODO
-			//Handle undefined
-		}
-
-		private enum Val {
-			TypeError,
-			UnsupportedFunctionError,
-			UnsupportedTypeError,
-			RuntimeError,
-			NumPos,
-			NumZero,
-			NumNeg,
-			BTrue,
-			BFalse;
-			public static HashSet<Val> anyNum(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(NumPos);
-				ret.add(NumZero);
-				ret.add(NumNeg);
-				return ret;
-			}
-			public HashSet<Val> anyBool(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(BTrue);
-				ret.add(BFalse);
-				return ret;
-			}
-			public static HashSet<Val> ofNum(double num){
-				HashSet<Val> ret = new HashSet<>();
-				if (num < 0) ret.add(NumNeg);
-				if (num > 0) ret.add(NumPos);
-				if (num == 0) ret.add(NumZero);
-				return ret;
-			}
-			public static HashSet<Val> ofBool(boolean bool){
-				HashSet<Val> ret = new HashSet<>();
-				if (bool) ret.add(BTrue);
-				else ret.add(BFalse);
-				return ret;
-			}
-			public HashSet<Val> typeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(TypeError);
-				return ret;
-			}
-			public HashSet<Val> unsupportedFunctionError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(UnsupportedFunctionError);
-				return ret;
-			}
-			public HashSet<Val> unsupportedTypeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(UnsupportedTypeError);
-				return ret;
-			}
-			public HashSet<Val> runtimeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(RuntimeError);
-				return ret;
-			}
-		}
 	}
 
 	static class FunVal implements Value { //New in the funclang

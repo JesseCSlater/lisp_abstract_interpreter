@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import funclang.abstractions.abstractNumVal;
 
 import funclang.Env.*;
 
@@ -25,21 +26,22 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(AddExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
-		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			AbstractVal result = null;
+		//use abstract version of add if abstractNumVal detected
+		if (values.stream().anyMatch((x) -> x instanceof abstractNumVal)) {
+			abstractNumVal result = null;
 
 			for (Value _val : values) {
-				AbstractVal currentVal;
-				if (_val instanceof AbstractVal) {
-					currentVal = (AbstractVal) _val;
+				abstractNumVal currentVal;
+				if (!(_val instanceof abstractNumVal)) {
+					currentVal = new abstractNumVal(((NumVal) _val).v());
 				} else {
-					currentVal = new AbstractVal(_val);
+					currentVal = (abstractNumVal) _val;
 				}
 
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.AbstractAdd(currentVal);
+					result = abstractNumVal.abstractAdd(result, currentVal);
 				}
 			}
 
@@ -78,7 +80,7 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(DivExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
-		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+		if (values.stream().anyMatch((x) -> x instanceof abstractNumVal)) {
 			//TODO
 			//Handle abstract values here
 			return null;
@@ -96,7 +98,7 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(MultExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
-		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+		if (values.stream().anyMatch((x) -> x instanceof abstractNumVal)) {
 			//TODO
 			//Handle abstract values here
 			return null;
@@ -125,7 +127,7 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(SubExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
-		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+		if (values.stream().anyMatch((x) -> x instanceof abstractNumVal)) {
 			//TODO
 			//Handle abstract values here
 			return null;
@@ -411,9 +413,25 @@ public class Evaluator implements Visitor<Value> {
 
 	public void setAbstractEnv(ArrayList<String> abstractEnv) {
 		initEnv = new GlobalEnv();
-		for (String s : abstractEnv) {
-			((GlobalEnv) initEnv).extend(s, new NumVal(2));
+		for (int i = 0; i + 2 < abstractEnv.size(); i+=3) {
+			String s = abstractEnv.get(i);
+			String v = abstractEnv.get(i + 1);
+			String a = abstractEnv.get(i + 2);
+			((GlobalEnv) initEnv).extend(s, findValue(v, a));
 		}
+	}
+
+	public Value findValue(String v, String a){
+		Value val;
+		switch (v) {
+			case ("abstractNumVal"):
+				val = new abstractNumVal(a);
+				break;
+			default:
+				val = new NumVal(2); //Dummy Default
+				break;
+		}
+		return val;
 	}
 
 	Reader _reader;
