@@ -2,12 +2,10 @@ package funclang;
 import static funclang.AST.*;
 import static funclang.Value.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.io.File;
 import java.io.IOException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import funclang.Env.*;
 
@@ -27,19 +25,17 @@ public class Evaluator implements Visitor<Value> {
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
 			AbstractVal result = null;
-
 			for (Value _val : values) {
 				AbstractVal currentVal;
 				if (_val instanceof AbstractVal) {
 					currentVal = (AbstractVal) _val;
 				} else {
-					currentVal = new AbstractVal(_val);
+					currentVal = AbstractVal.ofValNum(_val);
 				}
-
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.AbstractAdd(currentVal);
+					result.combineAdd(currentVal);
 				}
 			}
 
@@ -79,9 +75,22 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			//TODO
-			//Handle abstract values here
-			return null;
+			AbstractVal result = null;
+			for (Value _val : values) {
+				AbstractVal currentVal;
+				if (_val instanceof AbstractVal) {
+					currentVal = (AbstractVal) _val;
+				} else {
+					currentVal = AbstractVal.ofValNum(_val);
+				}
+				if (result == null) {
+					result = currentVal;
+				} else {
+					result.combineDiv(currentVal);
+				}
+			}
+
+			return result;
 		}
 
 		double result = ((NumVal) values.remove(0)).v();
@@ -97,9 +106,23 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			//TODO
-			//Handle abstract values here
-			return null;
+
+			AbstractVal result = null;
+			for (Value _val : values) {
+				AbstractVal currentVal;
+				if (_val instanceof AbstractVal) {
+					currentVal = (AbstractVal) _val;
+				} else {
+					currentVal = AbstractVal.ofValNum(_val);
+				}
+				if (result == null) {
+					result = currentVal;
+				} else {
+					result.combineMult(currentVal);
+				}
+			}
+
+			return result;
 		}
 
 		double result = 1;
@@ -126,9 +149,23 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			//TODO
-			//Handle abstract values here
-			return null;
+
+			AbstractVal result = null;
+			for (Value _val : values) {
+				AbstractVal currentVal;
+				if (_val instanceof AbstractVal) {
+					currentVal = (AbstractVal) _val;
+				} else {
+					currentVal = AbstractVal.ofValNum(_val);
+				}
+				if (result == null) {
+					result = currentVal;
+				} else {
+					result.combineSub(currentVal);
+				}
+			}
+
+			return result;
 		}
 
 		double result = ((NumVal) values.remove(0)).v();
@@ -146,10 +183,10 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	@Override
-	public Value visit(LetExp e, Env env) { // New for varlang.
+	public Value visit(LetExp e, Env env) { // New for var lang.
 		List<String> names = e.names();
 		List<Exp> value_exps = e.value_exps();
-		List<Value> values = new ArrayList<Value>(value_exps.size());
+		List<Value> values = new ArrayList<>(value_exps.size());
 
 		for(Exp exp : value_exps)
 			values.add((Value)exp.accept(this, env));
@@ -184,7 +221,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Exp> operands = e.operands();
 
 		// Call-by-value semantics
-		List<Value> actuals = new ArrayList<Value>(operands.size());
+		List<Value> actuals = new ArrayList<>(operands.size());
 		for(Exp exp : operands)
 			actuals.add((Value)exp.accept(this, env));
 
@@ -225,18 +262,13 @@ public class Evaluator implements Visitor<Value> {
 		} else if (v1 instanceof PairVal && v2 instanceof PairVal) {
 			boolean b1 = equalValue(((PairVal)v1).fst(), ((PairVal)v2).fst());
 			boolean b2 = equalValue(((PairVal)v1).snd(), ((PairVal)v2).snd());
-			if (b1 && b2) return true;
-			return false;
-		} /*else if (v1 instanceof FunVal && v2 instanceof FunVal) {
+            return b1 && b2;
+        } /*else if (v1 instanceof FunVal && v2 instanceof FunVal) {
 			return v1 == v2;
-		} */else if (v1 instanceof BoolVal && v2 instanceof BoolVal) {
+		} */else // list
+            if (v1 instanceof BoolVal && v2 instanceof BoolVal) {
 			return ((BoolVal)v1).v() == ((BoolVal)v2).v();
-		} else if (v1 instanceof Null && v2 instanceof Null){
-			// list
-			return true;
-		} else {
-			return false;
-		}
+		} else return v1 instanceof Null && v2 instanceof Null;
 	}
 
 	public static int compareValue(Value v1, Value v2) {
@@ -412,7 +444,7 @@ public class Evaluator implements Visitor<Value> {
 	public void setAbstractEnv(ArrayList<String> abstractEnv) {
 		initEnv = new GlobalEnv();
 		for (String s : abstractEnv) {
-			((GlobalEnv) initEnv).extend(s, new NumVal(2));
+			((GlobalEnv) initEnv).extend(s, AbstractVal.anyNum());
 		}
 	}
 

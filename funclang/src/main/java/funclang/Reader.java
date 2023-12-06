@@ -25,8 +25,8 @@ public class Reader {
 				StringBuilder sb = new StringBuilder();
 				String line = brf.readLine();
 				ArrayList<String> x = new ArrayList<>();
-				if (line.startsWith("#abstract ")) {
-                    abstractEnv = new ArrayList<>(Arrays.asList(line.substring(10).split(" ")));
+				if (line.startsWith("(abstract ")) {
+                    abstractEnv = new ArrayList<>(Arrays.asList(line.substring(10).split(" "))); //TODO Parse Better
 					line = brf.readLine();
 				}
 

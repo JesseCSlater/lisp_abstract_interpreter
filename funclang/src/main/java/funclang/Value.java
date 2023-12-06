@@ -1,9 +1,10 @@
 package funclang;
 
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import funclang.AST.Exp;
 
@@ -25,8 +26,12 @@ public interface Value {
 			} else if (value instanceof BoolVal) {
 				_vals.addAll(Val.ofBool(((BoolVal) value).v()));
 			} else {
-				_vals.add(Val.UnsupportedTypeError);
+				_vals.add(Val.TypeError);
 			}
+		}
+
+		public AbstractVal(HashSet<Val> vals) {
+			this._vals = vals;
 		}
 
 		@Override
@@ -38,25 +43,124 @@ public interface Value {
 		public void print() {
 			System.out.println(this.tostring());
 		}
-
-		public void AbstractAdd(AbstractVal addingVal) {
-			HashSet<Val> new_vals = new HashSet<>();
-			HashSet<Val> adding_vals = addingVal._vals;
-
-			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
-			if ((_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumNeg)) ||
-					(_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumPos))) new_vals.addAll(Val.anyNum());
-
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumPos)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumNeg)) new_vals.add(Val.NumNeg);
-			if (_vals.contains(Val.NumZero) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumZero);
-			if (_vals.contains(Val.NumPos) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumPos);
-			if (_vals.contains(Val.NumNeg) && adding_vals.contains(Val.NumZero)) new_vals.add(Val.NumNeg);
-			//TODO
-			//Handle undefined
+		private void combine(AbstractVal other, BiFunction<Val, Val, HashSet<Val>> f){
+			if (this._vals.isEmpty()) {
+				this._vals = other._vals;
+				return;
+			}
+			HashSet<Val> val = new HashSet<>();
+			for (Val va: this._vals) {
+				for (Val vb: other._vals) {
+					val.addAll(f.apply(va, vb));
+				}
+			}
+			this._vals = val;
+		}
+		public void combineAdd(AbstractVal other) {
+			this.combine(other,
+					(s1, s2) -> {
+						HashSet<Val> ret = new HashSet<>();
+						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
+						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						else if (s1 == Val.NumZero) ret.add(s2);
+						else if (s2 == Val.NumZero) ret.add(s1);
+						else if (s1 == s2) ret.add(s1);
+						else {
+							ret.add(Val.NumZero);
+							ret.add(Val.NumPos);
+							ret.add(Val.NumNeg);
+						}
+						return ret;
+					});
 		}
 
+		public void combineDiv(AbstractVal other) {
+			this.combine(other,
+					(s1, s2) -> {
+						HashSet<Val> ret = new HashSet<>();
+						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
+						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						else if (s2 == Val.NumZero) ret.add(Val.RuntimeError);
+						else if (s1 == Val.NumZero) ret.add(Val.NumZero);
+						else if (s1 == s2) ret.add(Val.NumPos);
+						else ret.add(Val.NumNeg);
+						return ret;
+					}
+			);
+		}
+
+		public void combineMult(AbstractVal other) {
+			this.combine(other,
+					(s1, s2) -> {
+						HashSet<Val> ret = new HashSet<>();
+						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
+						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						else if (s1 == Val.NumZero || s2 == Val.NumZero) ret.add(Val.NumZero);
+						else if (s1 == s2) ret.add(Val.NumPos);
+						else ret.add(Val.NumNeg);
+						return ret;
+					}
+			);
+		}
+
+		public void combineSub(AbstractVal other) {
+			this.combine(other,
+					(s1, s2) -> {
+						HashSet<Val> ret = new HashSet<>();
+						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
+						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						else if (s2 == Val.NumZero) ret.add(s1);
+						else if (s1 == Val.NumZero && s2 == Val.NumPos) ret.add(Val.NumNeg);
+						else if (s1 == Val.NumZero && s2 == Val.NumNeg) ret.add(Val.NumPos);
+						else if (s1 != s2) ret.add(s1);
+						else {
+							ret.add(Val.NumZero);
+							ret.add(Val.NumPos);
+							ret.add(Val.NumNeg);
+						}
+						return ret;
+					}
+			);
+		}
+
+		public static AbstractVal ofValNum(Value v){
+			HashSet<Val> ret = new HashSet<>();
+			if (v instanceof NumVal) {
+				double num = ((NumVal)v).v();
+				if (num < 0) ret.add(Val.NumNeg);
+				if (num > 0) ret.add(Val.NumPos);
+				if (num == 0) ret.add(Val.NumZero);
+			}
+			else {
+				ret.add(Val.TypeError);
+			}
+			return new AbstractVal(ret);
+		}
+		public static AbstractVal ofValBool(Value v) {
+			HashSet<Val> ret = new HashSet<>();
+			if (v instanceof BoolVal) {
+				boolean bool = ((BoolVal) v).v();
+				if (bool) ret.add(Val.BTrue);
+				else ret.add(Val.BFalse);
+			} else {
+				ret.add(Val.TypeError);
+			}
+			return new AbstractVal(ret);
+		}
+		public static AbstractVal anyNum(){
+			HashSet<Val> ret = new HashSet<>();
+			ret.add(Val.NumPos);
+			ret.add(Val.NumZero);
+			ret.add(Val.NumNeg);
+			return new AbstractVal(ret);
+		}
+		public static AbstractVal anyBool(){
+			HashSet<Val> ret = new HashSet<>();
+			ret.add(Val.BTrue);
+			ret.add(Val.BFalse);
+			return new AbstractVal(ret);
+		}
 		private enum Val {
 			TypeError,
 			UnsupportedFunctionError,
@@ -67,19 +171,6 @@ public interface Value {
 			NumNeg,
 			BTrue,
 			BFalse;
-			public static HashSet<Val> anyNum(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(NumPos);
-				ret.add(NumZero);
-				ret.add(NumNeg);
-				return ret;
-			}
-			public HashSet<Val> anyBool(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(BTrue);
-				ret.add(BFalse);
-				return ret;
-			}
 			public static HashSet<Val> ofNum(double num){
 				HashSet<Val> ret = new HashSet<>();
 				if (num < 0) ret.add(NumNeg);
@@ -105,7 +196,7 @@ public interface Value {
 			}
 			public HashSet<Val> unsupportedTypeError(){
 				HashSet<Val> ret = new HashSet<>();
-				ret.add(UnsupportedTypeError);
+				ret.add(TypeError);
 				return ret;
 			}
 			public HashSet<Val> runtimeError(){
@@ -128,9 +219,9 @@ public interface Value {
 		public Env env() { return _env; }
 		public List<String> formals() { return _formals; }
 		public Exp body() { return _body; }
-	    public String tostring() { 
+	    public String tostring() {
 			String result = "(lambda ( ";
-			for(String formal : _formals) 
+			for(String formal : _formals)
 				result += formal + " ";
 			result += ") ";
 			result += _body.accept(new Printer.Formatter(), _env);
@@ -151,10 +242,10 @@ public interface Value {
 
 	    public double v() { return _val; }
 
-	    public String tostring() { 
+	    public String tostring() {
 	    	int tmp = (int) _val;
 	    	if(tmp == _val) return "" + tmp;
-	    	return "" + _val; 
+	    	return "" + _val;
 	    }
 
 		public void print() {
@@ -163,7 +254,7 @@ public interface Value {
 	}
 	static class BoolVal implements Value {
 		private boolean _val;
-	    public BoolVal(boolean v) { _val = v; } 
+	    public BoolVal(boolean v) { _val = v; }
 	    public boolean v() { return _val; }
 	    public String tostring() { if(_val) return "#t"; return "#f"; }
 
@@ -174,7 +265,7 @@ public interface Value {
 
 	static class StringVal implements Value {
 		private java.lang.String _val;
-	    public StringVal(String v) { _val = v; } 
+	    public StringVal(String v) { _val = v; }
 	    public String v() { return _val; }
 	    public java.lang.String tostring() { return "" + _val; }
 
@@ -185,12 +276,12 @@ public interface Value {
 	static class PairVal implements Value {
 		protected Value _fst;
 		protected Value _snd;
-	    public PairVal(Value fst, Value snd) { _fst = fst; _snd = snd; } 
+	    public PairVal(Value fst, Value snd) { _fst = fst; _snd = snd; }
 		public Value fst() { return _fst; }
 		public Value snd() { return _snd; }
-	    public java.lang.String tostring() { 
+	    public java.lang.String tostring() {
 	    	if(isList()) return listToString();
-	    	return "(" + _fst.tostring() + " " + _snd.tostring() + ")"; 
+	    	return "(" + _fst.tostring() + " " + _snd.tostring() + ")";
 	    }
 	    public boolean isList() {
 	    	if(_snd instanceof Value.Null) return true;
@@ -218,7 +309,7 @@ public interface Value {
 	    private java.lang.String listToString() {
 	    	String result = "(";
 	    	result += _fst.tostring();
-	    	Value next = _snd; 
+	    	Value next = _snd;
 	    	while(!(next instanceof Value.Null)) {
 	    		result += " " + ((PairVal) next)._fst.tostring();
 	    		next = ((PairVal) next)._snd;
@@ -246,7 +337,7 @@ public interface Value {
 			System.out.println(this.tostring());
 		}
 	}
-	static class DynamicError implements Value { 
+	static class DynamicError implements Value {
 		private String message = "Unknown dynamic error.";
 		public DynamicError(String message) { this.message = message; }
 	    public String tostring() { return "" + message; }

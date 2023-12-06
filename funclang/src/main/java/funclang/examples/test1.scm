@@ -1,3 +1,3 @@
-#abstract x y z
+(abstract (x NumPos NumNeg) (y BTrue BFalse) (z TypeError))
 
-(+ x y)
+(+ (* x 0) 1)
