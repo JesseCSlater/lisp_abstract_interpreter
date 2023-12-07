@@ -28,7 +28,7 @@ public class Interpreter {
 				Reader.Ret read = reader.read();
 				p = read.p;
 				if(p._e == null) continue;
-				eval.setAbstractEnv(read.abstractEnv);
+				eval.setAbstractEnv(read.abstractEnv, read.abstractVal);
 				Value val = eval.valueOf(p);
 				printer.print(val);
 			} catch (Env.LookupException e) {

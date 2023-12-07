@@ -161,7 +161,7 @@ public interface Value {
 			ret.add(Val.BFalse);
 			return new AbstractVal(ret);
 		}
-		private enum Val {
+		public enum Val {
 			TypeError,
 			UnsupportedFunctionError,
 			UnsupportedTypeError,

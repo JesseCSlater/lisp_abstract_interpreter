@@ -1,3 +1,3 @@
-(abstract (x NumPos NumNeg) (y BTrue BFalse) (z TypeError))
+(abstract (x NumPos NumZero) (y))
 
-(+ (* x 0) 1)
+(+ x 1)
