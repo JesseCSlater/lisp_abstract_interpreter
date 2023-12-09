@@ -332,17 +332,38 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(val instanceof Value.Null);
 	}
 
-	//TODO add check if abstract num
 	@Override
 	public Value visit(IsNumExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
+		if (val instanceof AbstractVal) {
+			AbstractVal ret = new AbstractVal();
+			for (AbstractVal.Val v: ((AbstractVal) val)._vals) {
+				if (v == AbstractVal.Val.RuntimeError) ret._vals.add(AbstractVal.Val.RuntimeError);
+				if (v == AbstractVal.Val.TypeError) ret._vals.add(AbstractVal.Val.TypeError);
+				if (v == AbstractVal.Val.UnsupportedFunctionError) ret._vals.add(AbstractVal.Val.UnsupportedFunctionError);
+				if (v == AbstractVal.Val.UnsupportedTypeError) ret._vals.add(AbstractVal.Val.BFalse);
+				if (v == AbstractVal.Val.BFalse || v == AbstractVal.Val.BTrue) ret._vals.add(AbstractVal.Val.BFalse);
+				if (v == AbstractVal.Val.NumPos || v == AbstractVal.Val.NumZero ||v == AbstractVal.Val.NumNeg) ret._vals.add(AbstractVal.Val.BTrue);
+			}
+			return ret;
+		}
 		return new BoolVal(val instanceof Value.NumVal);
 	}
-
-	//TODO add check if abstract bool
 	@Override
 	public Value visit(IsBoolExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
+		if (val instanceof AbstractVal) {
+			AbstractVal ret = new AbstractVal();
+			for (AbstractVal.Val v: ((AbstractVal) val)._vals) {
+				if (v == AbstractVal.Val.RuntimeError) ret._vals.add(AbstractVal.Val.RuntimeError);
+				if (v == AbstractVal.Val.TypeError) ret._vals.add(AbstractVal.Val.TypeError);
+				if (v == AbstractVal.Val.UnsupportedFunctionError) ret._vals.add(AbstractVal.Val.UnsupportedFunctionError);
+				if (v == AbstractVal.Val.UnsupportedTypeError) ret._vals.add(AbstractVal.Val.BFalse);
+				if (v == AbstractVal.Val.BFalse || v == AbstractVal.Val.BTrue) ret._vals.add(AbstractVal.Val.BTrue);
+				if (v == AbstractVal.Val.NumPos || v == AbstractVal.Val.NumZero ||v == AbstractVal.Val.NumNeg) ret._vals.add(AbstractVal.Val.BFalse);
+			}
+			return ret;
+		}
 		return new BoolVal(val instanceof Value.BoolVal);
 	}
 

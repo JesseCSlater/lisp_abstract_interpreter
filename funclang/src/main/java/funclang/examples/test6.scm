@@ -1,3 +1,2 @@
-(abstract (x NumNeg) (y NumNeg NumPos)
+(abstract (n NumPos) (b BTrue) (a NumPos BTrue))
 
-(= 2 y)
