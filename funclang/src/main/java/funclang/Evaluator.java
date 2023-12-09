@@ -35,7 +35,7 @@ public class Evaluator implements Visitor<Value> {
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.combineAdd(currentVal);
+					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractAdd);
 				}
 			}
 
@@ -86,7 +86,7 @@ public class Evaluator implements Visitor<Value> {
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.combineDiv(currentVal);
+					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractDiv);
 				}
 			}
 
@@ -118,7 +118,7 @@ public class Evaluator implements Visitor<Value> {
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.combineMult(currentVal);
+					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractMul);
 				}
 			}
 
@@ -147,9 +147,7 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(SubExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
-
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-
 			AbstractVal result = null;
 			for (Value _val : values) {
 				AbstractVal currentVal;
@@ -161,7 +159,7 @@ public class Evaluator implements Visitor<Value> {
 				if (result == null) {
 					result = currentVal;
 				} else {
-					result.combineSub(currentVal);
+					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractSub);
 				}
 			}
 
@@ -265,10 +263,7 @@ public class Evaluator implements Visitor<Value> {
         } else if(v1 instanceof AbstractVal && v2 instanceof AbstractVal){
 			return ((AbstractVal) v1).typeEqual((AbstractVal) v2);
 		}
-		//TODO: not sure if we commented this out or if it was that way
-		/*else if (v1 instanceof FunVal && v2 instanceof FunVal) {
-			return v1 == v2;
-		} */else // list
+		else // list
             if (v1 instanceof BoolVal && v2 instanceof BoolVal) {
 			return ((BoolVal)v1).v() == ((BoolVal)v2).v();
 		} else return v1 instanceof Null && v2 instanceof Null;

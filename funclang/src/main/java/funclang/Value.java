@@ -20,15 +20,7 @@ public interface Value {
 	static class AbstractVal implements Value {
 		private HashSet<Val> _vals = new HashSet<>();
 
-		public AbstractVal(Value value) {
-			if (value instanceof NumVal) {
-				_vals.addAll(Val.ofNum(((NumVal) value).v()));
-			} else if (value instanceof BoolVal) {
-				_vals.addAll(Val.ofBool(((BoolVal) value).v()));
-			} else {
-				_vals.add(Val.TypeError);
-			}
-		}
+		public AbstractVal() {}
 
 		public AbstractVal(HashSet<Val> vals) {
 			this._vals = vals;
@@ -62,89 +54,68 @@ public interface Value {
 				return false;
 		}
 
-		private void combine(AbstractVal other, BiFunction<Val, Val, HashSet<Val>> f){
-			if (this._vals.isEmpty()) {
-				this._vals = other._vals;
-				return;
+		public static AbstractVal combine(AbstractVal fst, AbstractVal snd, BiFunction<Val, Val, AbstractVal> f){
+			if (fst._vals.isEmpty()) {
+				return snd;
 			}
 			HashSet<Val> val = new HashSet<>();
-			for (Val va: this._vals) {
-				for (Val vb: other._vals) {
-					val.addAll(f.apply(va, vb));
+			if (fst._vals.contains(Val.RuntimeError) || snd._vals.contains(Val.RuntimeError)) val.add(Val.RuntimeError);
+			if (fst._vals.contains(Val.TypeError) || snd._vals.contains(Val.TypeError)) val.add(Val.TypeError);
+			if (fst._vals.contains(Val.UnsupportedTypeError) || snd._vals.contains(Val.UnsupportedTypeError)) val.add(Val.UnsupportedTypeError);
+			if (fst._vals.contains(Val.UnsupportedFunctionError) || snd._vals.contains(Val.UnsupportedFunctionError)) val.add(Val.UnsupportedFunctionError);
+			for (Val va: fst._vals) {
+				for (Val vb: snd._vals) {
+					val.addAll(f.apply(va, vb)._vals);
 				}
 			}
-			this._vals = val;
-		}
-		public void combineAdd(AbstractVal other) {
-			this.combine(other,
-					(s1, s2) -> {
-						HashSet<Val> ret = new HashSet<>();
-						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
-						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
-						if (s1 == Val.BTrue || s2 == Val.BTrue) ret.add(Val.TypeError);
-						else if (s1 == Val.NumZero) ret.add(s2);
-						else if (s2 == Val.NumZero) ret.add(s1);
-						else if (s1 == s2) ret.add(s1);
-						else {
-							ret.add(Val.NumZero);
-							ret.add(Val.NumPos);
-							ret.add(Val.NumNeg);
-						}
-
-						return ret;
-					});
+			return new AbstractVal(val);
 		}
 
-		public void combineDiv(AbstractVal other) {
-			this.combine(other,
-					(s1, s2) -> {
-						HashSet<Val> ret = new HashSet<>();
-						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
-						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
-						else if (s2 == Val.NumZero) ret.add(Val.RuntimeError);
-						else if (s1 == Val.NumZero) ret.add(Val.NumZero);
-						else if (s1 == s2) ret.add(Val.NumPos);
-						else ret.add(Val.NumNeg);
-						return ret;
-					}
-			);
-		}
+		public static AbstractVal abstractAdd(Val s1, Val s2) {
+			HashSet<Val> ret = new HashSet<>();
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
+			else if (s1 == Val.NumZero) ret.add(s2);
+			else if (s2 == Val.NumZero) ret.add(s1);
+			else if (s1 == s2) ret.add(s1);
+			else {
+				ret.add(Val.NumZero);
+				ret.add(Val.NumPos);
+				ret.add(Val.NumNeg);
+			}
+			return new AbstractVal(ret);
+		};
+		public static AbstractVal abstractDiv(Val s1, Val s2) {
+			HashSet<Val> ret = new HashSet<>();
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			else if (s2 == Val.NumZero) ret.add(Val.RuntimeError);
+			else if (s1 == Val.NumZero) ret.add(Val.NumZero);
+			else if (s1 == s2) ret.add(Val.NumPos);
+			else ret.add(Val.NumNeg);
+			return new AbstractVal(ret);
+		};
 
-		public void combineMult(AbstractVal other) {
-			this.combine(other,
-					(s1, s2) -> {
-						HashSet<Val> ret = new HashSet<>();
-						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
-						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
-						else if (s1 == Val.NumZero || s2 == Val.NumZero) ret.add(Val.NumZero);
-						else if (s1 == s2) ret.add(Val.NumPos);
-						else ret.add(Val.NumNeg);
-						return ret;
-					}
-			);
-		}
-
-		public void combineSub(AbstractVal other) {
-			this.combine(other,
-					(s1, s2) -> {
-						HashSet<Val> ret = new HashSet<>();
-						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
-						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
-						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
-						else if (s2 == Val.NumZero) ret.add(s1);
-						else if (s1 == Val.NumZero && s2 == Val.NumPos) ret.add(Val.NumNeg);
-						else if (s1 == Val.NumZero && s2 == Val.NumNeg) ret.add(Val.NumPos);
-						else if (s1 != s2) ret.add(s1);
-						else {
-							ret.add(Val.NumZero);
-							ret.add(Val.NumPos);
-							ret.add(Val.NumNeg);
-						}
-						return ret;
-					}
-			);
-		}
-
+		public static AbstractVal abstractMul(Val s1, Val s2) {
+			HashSet<Val> ret = new HashSet<>();
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			else if (s1 == Val.NumZero || s2 == Val.NumZero) ret.add(Val.NumZero);
+			else if (s1 == s2) ret.add(Val.NumPos);
+			else ret.add(Val.NumNeg);
+			return new AbstractVal(ret);
+		};
+		public static AbstractVal abstractSub(Val s1, Val s2) {
+			HashSet<Val> ret = new HashSet<>();
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			else if (s2 == Val.NumZero) ret.add(s1);
+			else if (s1 == Val.NumZero && s2 == Val.NumPos) ret.add(Val.NumNeg);
+			else if (s1 == Val.NumZero && s2 == Val.NumNeg) ret.add(Val.NumPos);
+			else if (s1 != s2) ret.add(s1);
+			else {
+				ret.add(Val.NumZero);
+				ret.add(Val.NumPos);
+				ret.add(Val.NumNeg);
+			}
+			return new AbstractVal(ret);
+		};
 		public static AbstractVal ofValNum(Value v){
 			HashSet<Val> ret = new HashSet<>();
 			if (v instanceof NumVal) {
@@ -182,6 +153,7 @@ public interface Value {
 			ret.add(Val.BFalse);
 			return new AbstractVal(ret);
 		}
+
 		public enum Val {
 			TypeError,
 			UnsupportedFunctionError,
@@ -192,7 +164,7 @@ public interface Value {
 			NumNeg,
 			BTrue,
 			BFalse;
-			public static HashSet<Val> ofNum(double num){
+			static HashSet<Val> ofNum(double num){
 				HashSet<Val> ret = new HashSet<>();
 				if (num < 0) ret.add(NumNeg);
 				if (num > 0) ret.add(NumPos);
