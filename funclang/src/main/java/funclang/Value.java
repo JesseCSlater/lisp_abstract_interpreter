@@ -46,17 +46,19 @@ public interface Value {
 
 		boolean typeEqual(AbstractVal v2)
 		{
-			//TODO what to do if only contains error
 			if((this._vals.contains(Val.NumZero) || this._vals.contains(Val.NumPos) || this._vals.contains(Val.NumNeg))
 					&& (v2._vals.contains(Val.NumZero) || v2._vals.contains(Val.NumPos) || v2._vals.contains(Val.NumNeg)))
 			{
+				//TODO how to compare
 				return true;
 			}
 			if((this._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue))
 					&& (v2._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue)))
 			{
+				//TODO how to compare
 				return true;
 			}
+			//TODO what to do if only contains error
 				return false;
 		}
 
