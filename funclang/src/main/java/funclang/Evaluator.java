@@ -442,7 +442,6 @@ public class Evaluator implements Visitor<Value> {
 
 
 	public void setAbstractEnv(ArrayList<String> abstractEnv, ArrayList<Value> EnvVariable) {
-		initEnv = new GlobalEnv();
 		for (int i = 0; i < abstractEnv.size(); i++) {
 			((GlobalEnv) initEnv).extend(abstractEnv.get(i), EnvVariable.get(i));
 		}

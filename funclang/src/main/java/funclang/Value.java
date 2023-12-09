@@ -60,8 +60,9 @@ public interface Value {
 			this.combine(other,
 					(s1, s2) -> {
 						HashSet<Val> ret = new HashSet<>();
-						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
 						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+						if (s1 == Val.TypeError || s2 == Val.TypeError) ret.add(Val.TypeError);
+						if (s1 == Val.BTrue || s2 == Val.BTrue) ret.add(Val.TypeError);
 						else if (s1 == Val.NumZero) ret.add(s2);
 						else if (s2 == Val.NumZero) ret.add(s1);
 						else if (s1 == s2) ret.add(s1);
@@ -70,6 +71,7 @@ public interface Value {
 							ret.add(Val.NumPos);
 							ret.add(Val.NumNeg);
 						}
+
 						return ret;
 					});
 		}

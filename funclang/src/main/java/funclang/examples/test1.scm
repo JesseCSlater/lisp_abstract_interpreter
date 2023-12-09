@@ -1,3 +1,3 @@
-(abstract (x NumPos NumZero) (y))
+(abstract (x NumPos NumZero))
 
-(+ x 1)
+(+ 1 x)
