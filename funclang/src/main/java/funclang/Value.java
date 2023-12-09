@@ -53,7 +53,23 @@ public interface Value {
 			//TODO what to do if only contains error
 				return false;
 		}
-
+		public static AbstractVal combineArith(List<Value> vals, BiFunction<Val, Val, AbstractVal> f) {
+			AbstractVal result = null;
+			for (Value _val : vals) {
+				AbstractVal currentVal;
+				if (_val instanceof AbstractVal) {
+					currentVal = (AbstractVal) _val;
+				} else {
+					currentVal = AbstractVal.ofValNum(_val);
+				}
+				if (result == null) {
+					result = currentVal;
+				} else {
+					result = AbstractVal.combine(result, currentVal, f);
+				}
+			}
+			return result;
+		}
 		public static AbstractVal combine(AbstractVal fst, AbstractVal snd, BiFunction<Val, Val, AbstractVal> f){
 			if (fst._vals.isEmpty()) {
 				return snd;
@@ -70,7 +86,6 @@ public interface Value {
 			}
 			return new AbstractVal(val);
 		}
-
 		public static AbstractVal abstractAdd(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);

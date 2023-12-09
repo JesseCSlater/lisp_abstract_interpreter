@@ -24,22 +24,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			AbstractVal result = null;
-			for (Value _val : values) {
-				AbstractVal currentVal;
-				if (_val instanceof AbstractVal) {
-					currentVal = (AbstractVal) _val;
-				} else {
-					currentVal = AbstractVal.ofValNum(_val);
-				}
-				if (result == null) {
-					result = currentVal;
-				} else {
-					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractAdd);
-				}
-			}
-
-			return result;
+			return AbstractVal.combineArith(values, AbstractVal::abstractAdd);
 		}
 
 		double result = 0;
@@ -75,22 +60,8 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			AbstractVal result = null;
-			for (Value _val : values) {
-				AbstractVal currentVal;
-				if (_val instanceof AbstractVal) {
-					currentVal = (AbstractVal) _val;
-				} else {
-					currentVal = AbstractVal.ofValNum(_val);
-				}
-				if (result == null) {
-					result = currentVal;
-				} else {
-					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractDiv);
-				}
-			}
+			return AbstractVal.combineArith(values, AbstractVal::abstractDiv);
 
-			return result;
 		}
 
 		double result = ((NumVal) values.remove(0)).v();
@@ -106,23 +77,7 @@ public class Evaluator implements Visitor<Value> {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
 
 		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-
-			AbstractVal result = null;
-			for (Value _val : values) {
-				AbstractVal currentVal;
-				if (_val instanceof AbstractVal) {
-					currentVal = (AbstractVal) _val;
-				} else {
-					currentVal = AbstractVal.ofValNum(_val);
-				}
-				if (result == null) {
-					result = currentVal;
-				} else {
-					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractMul);
-				}
-			}
-
-			return result;
+			return AbstractVal.combineArith(values, AbstractVal::abstractMul);
 		}
 
 		double result = 1;
@@ -147,23 +102,9 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(SubExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
-		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
-			AbstractVal result = null;
-			for (Value _val : values) {
-				AbstractVal currentVal;
-				if (_val instanceof AbstractVal) {
-					currentVal = (AbstractVal) _val;
-				} else {
-					currentVal = AbstractVal.ofValNum(_val);
-				}
-				if (result == null) {
-					result = currentVal;
-				} else {
-					result = AbstractVal.combine(result, currentVal, AbstractVal::abstractSub);
-				}
-			}
 
-			return result;
+		if (values.stream().anyMatch((x) -> x instanceof AbstractVal)) {
+			return AbstractVal.combineArith(values, AbstractVal::abstractSub);
 		}
 
 		double result = ((NumVal) values.remove(0)).v();
