@@ -18,7 +18,7 @@ public interface Value {
 	}
 
 	static class AbstractVal implements Value {
-		private HashSet<Val> _vals = new HashSet<>();
+		public HashSet<Val> _vals = new HashSet<>();
 
 		public AbstractVal() {}
 
@@ -53,6 +53,7 @@ public interface Value {
 			//TODO what to do if only contains error
 				return false;
 		}
+
 		public static AbstractVal combineArith(List<Value> vals, BiFunction<Val, Val, AbstractVal> f) {
 			AbstractVal result = null;
 			for (Value _val : vals) {
@@ -70,6 +71,7 @@ public interface Value {
 			}
 			return result;
 		}
+
 		public static AbstractVal combine(AbstractVal fst, AbstractVal snd, BiFunction<Val, Val, AbstractVal> f){
 			if (fst._vals.isEmpty()) {
 				return snd;
