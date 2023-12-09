@@ -43,6 +43,23 @@ public interface Value {
 		public void print() {
 			System.out.println(this.tostring());
 		}
+
+		boolean typeEqual(AbstractVal v2)
+		{
+			//TODO what to do if only contains error
+			if((this._vals.contains(Val.NumZero) || this._vals.contains(Val.NumPos) || this._vals.contains(Val.NumNeg))
+					&& (v2._vals.contains(Val.NumZero) || v2._vals.contains(Val.NumPos) || v2._vals.contains(Val.NumNeg)))
+			{
+				return true;
+			}
+			if((this._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue))
+					&& (v2._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue)))
+			{
+				return true;
+			}
+				return false;
+		}
+
 		private void combine(AbstractVal other, BiFunction<Val, Val, HashSet<Val>> f){
 			if (this._vals.isEmpty()) {
 				this._vals = other._vals;

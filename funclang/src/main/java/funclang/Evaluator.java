@@ -250,7 +250,6 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	public static boolean equalValue(Value v1, Value v2) {
-		//TODO Equals semantics for abstract domain
 		if (v1 instanceof NumVal && v2 instanceof NumVal) {
 			NumVal first = (NumVal) v1;
 			NumVal second = (NumVal) v2;
@@ -263,7 +262,11 @@ public class Evaluator implements Visitor<Value> {
 			boolean b1 = equalValue(((PairVal)v1).fst(), ((PairVal)v2).fst());
 			boolean b2 = equalValue(((PairVal)v1).snd(), ((PairVal)v2).snd());
             return b1 && b2;
-        } /*else if (v1 instanceof FunVal && v2 instanceof FunVal) {
+        } else if(v1 instanceof AbstractVal && v2 instanceof AbstractVal){
+			return ((AbstractVal) v1).typeEqual((AbstractVal) v2);
+		}
+		//TODO: not sure if we commented this out or if it was that way
+		/*else if (v1 instanceof FunVal && v2 instanceof FunVal) {
 			return v1 == v2;
 		} */else // list
             if (v1 instanceof BoolVal && v2 instanceof BoolVal) {
