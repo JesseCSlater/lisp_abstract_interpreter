@@ -256,6 +256,29 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(EqualExp e, Env env) { // New for funclang.
 		Value v1 = (Value) e.first_exp().accept(this, env);
 		Value v2 = (Value) e.second_exp().accept(this, env);
+
+		if(v1 instanceof AbstractVal || v2 instanceof AbstractVal)
+		{
+			if(v1 instanceof NumVal)
+			{
+				v1 = AbstractVal.ofValNum(v1);
+			}
+			else if(v1 instanceof BoolVal)
+			{
+				v1 = AbstractVal.ofValBool(v1);
+			}
+
+			if(v2 instanceof NumVal)
+			{
+				v2 = AbstractVal.ofValNum(v2);
+			}
+			else if(v2 instanceof BoolVal)
+			{
+				v2 = AbstractVal.ofValBool(v2);
+			}
+			return AbstractVal.combine(((AbstractVal) v1), (AbstractVal) v2, AbstractVal::abstractEqual);
+		}
+
 		return new BoolVal(equalValue(v1, v2));
 	}
 

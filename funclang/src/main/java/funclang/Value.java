@@ -86,6 +86,15 @@ public interface Value {
 			}
 			return new AbstractVal(val);
 		}
+
+		public static AbstractVal abstractEqual(Val s1, Val s2)
+		{
+			HashSet<Val> ret = new HashSet<>();
+			if(s1 == s2) ret.add(s2);
+			return new AbstractVal(ret);
+		}
+
+
 		public static AbstractVal abstractAdd(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
@@ -101,7 +110,8 @@ public interface Value {
 		};
 		public static AbstractVal abstractDiv(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
-			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
+			if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
 			else if (s2 == Val.NumZero) ret.add(Val.RuntimeError);
 			else if (s1 == Val.NumZero) ret.add(Val.NumZero);
 			else if (s1 == s2) ret.add(Val.NumPos);
@@ -111,7 +121,8 @@ public interface Value {
 
 		public static AbstractVal abstractMul(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
-			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
+			if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
 			else if (s1 == Val.NumZero || s2 == Val.NumZero) ret.add(Val.NumZero);
 			else if (s1 == s2) ret.add(Val.NumPos);
 			else ret.add(Val.NumNeg);
@@ -119,7 +130,8 @@ public interface Value {
 		};
 		public static AbstractVal abstractSub(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
-			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);						if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
+			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
+			if (s1 == Val.RuntimeError || s2 == Val.RuntimeError) ret.add(Val.RuntimeError);
 			else if (s2 == Val.NumZero) ret.add(s1);
 			else if (s1 == Val.NumZero && s2 == Val.NumPos) ret.add(Val.NumNeg);
 			else if (s1 == Val.NumZero && s2 == Val.NumNeg) ret.add(Val.NumPos);
