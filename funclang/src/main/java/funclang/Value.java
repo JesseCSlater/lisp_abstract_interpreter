@@ -92,7 +92,8 @@ public interface Value {
 		public static AbstractVal abstractEqual(Val s1, Val s2)
 		{
 			HashSet<Val> ret = new HashSet<>();
-			if(s1 == s2) ret.add(s2);
+			if(s1 == s2) ret.add(Val.BTrue);
+			else ret.add(Val.BFalse);
 			return new AbstractVal(ret);
 		}
 

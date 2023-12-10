@@ -1,3 +1,3 @@
-(abstract (x NumPos NumZero))
+(abstract (x NumPos NumNeg))
 
-(+ 1 x)
+(if (= x -1) (+ x -1) (/ x 0))

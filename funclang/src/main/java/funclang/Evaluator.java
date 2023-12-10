@@ -179,6 +179,31 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(IfExp e, Env env) { // New for funclang.
 		Object result = e.conditional().accept(this, env);
+
+		if (result instanceof Value.AbstractVal) {
+			AbstractVal ret = new AbstractVal();
+			Value conditionA;
+			Value conditionB;
+
+			if (((AbstractVal) result)._vals.contains(AbstractVal.Val.BTrue)) {
+				conditionA = (Value) e.then_exp().accept(this, env);
+				if (conditionA instanceof AbstractVal) {
+					ret._vals.addAll(((AbstractVal) conditionA)._vals);
+				} else if (conditionA instanceof  NumVal) {
+					ret._vals.addAll(AbstractVal.Val.ofNum(((NumVal) conditionA).v()));
+				}
+			}
+			if (((AbstractVal) result)._vals.contains(AbstractVal.Val.BFalse)) {
+				conditionB = (Value) e.else_exp().accept(this, env);
+				if (conditionB instanceof AbstractVal) {
+					ret._vals.addAll(((AbstractVal) conditionB)._vals);
+				} else if (conditionB instanceof  NumVal) {
+					ret._vals.addAll(AbstractVal.Val.ofNum(((NumVal) conditionB).v()));
+				}
+			}
+			return ret;
+		}
+
 		if(!(result instanceof Value.BoolVal))
 			return new Value.DynamicError("Condition not a boolean in expression " +  ts.visit(e, env));
 		Value.BoolVal condition =  (Value.BoolVal) result; //Dynamic checking
