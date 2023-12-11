@@ -226,17 +226,13 @@ public class Evaluator implements Visitor<Value> {
 			boolean b1 = equalValue(((PairVal)v1).fst(), ((PairVal)v2).fst());
 			boolean b2 = equalValue(((PairVal)v1).snd(), ((PairVal)v2).snd());
             return b1 && b2;
-        } else if(v1 instanceof AbstractVal && v2 instanceof AbstractVal){
-			return ((AbstractVal) v1).typeEqual((AbstractVal) v2);
-		}
-		else // list
+        } else // list
             if (v1 instanceof BoolVal && v2 instanceof BoolVal) {
 			return ((BoolVal)v1).v() == ((BoolVal)v2).v();
 		} else return v1 instanceof Null && v2 instanceof Null;
 	}
 
 	public static int compareValue(Value v1, Value v2) {
-		//TODO write new compare function for abstract domain
 		if (equalValue(v1, v2)) {
 			return 0;
 		}
@@ -270,11 +266,46 @@ public class Evaluator implements Visitor<Value> {
 		return -1;
 	}
 
-	@Override
+	@Override //NOTE: in less than without abstract non-matching defaults to -1 so
+			  // less than will return true. There is also unexpected behaviour with boolean values
+			  //with abstract this will return false
 	public Value visit(LessExp e, Env env) { // New for funclang.
-		Value first = (Value) e.first_exp().accept(this, env);
-		Value second = (Value) e.second_exp().accept(this, env);
-		return new Value.BoolVal(compareValue(first, second) < 0);
+		Value v1 = (Value) e.first_exp().accept(this, env);
+		Value v2 = (Value) e.second_exp().accept(this, env);
+
+		if(v1 instanceof AbstractVal || v2 instanceof AbstractVal)
+		{
+			HashSet<AbstractVal.Val> val = new HashSet<>();
+			val.add(AbstractVal.Val.BFalse);
+
+			if(v1 instanceof NumVal)
+			{
+				v1 = AbstractVal.ofValNum(v1);
+			}
+			else if(v1 instanceof BoolVal)
+			{
+				return new Value.AbstractVal(val);
+			}
+
+			if(v2 instanceof NumVal)
+			{
+				v2 = AbstractVal.ofValNum(v2);
+			}
+			else if(v2 instanceof BoolVal)
+			{
+				return new Value.AbstractVal(val);
+			}
+
+			//In case of one abstract val and the other not number or boolean
+			if(!(v1 instanceof AbstractVal && v2 instanceof AbstractVal))
+			{
+				return new Value.AbstractVal(val);
+			}
+			//reverse order and use abstractGreater to check less than
+			return AbstractVal.combine(((AbstractVal) v2), (AbstractVal) v1, AbstractVal::abstractGreater);
+		}
+
+		return new Value.BoolVal(compareValue(v1, v2) < 0);
 	}
 
 	@Override
@@ -301,6 +332,15 @@ public class Evaluator implements Visitor<Value> {
 			{
 				v2 = AbstractVal.ofValBool(v2);
 			}
+
+			//In case of one abstract val and the other not number or boolean
+			if(!(v1 instanceof AbstractVal && v2 instanceof AbstractVal))
+			{
+				HashSet<AbstractVal.Val> val = new HashSet<>();
+				val.add(AbstractVal.Val.BFalse);
+				return new Value.AbstractVal(val);
+			}
+
 			return AbstractVal.combine(((AbstractVal) v1), (AbstractVal) v2, AbstractVal::abstractEqual);
 		}
 
@@ -309,9 +349,42 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(GreaterExp e, Env env) { // New for funclang.
-		Value first = (Value) e.first_exp().accept(this, env);
-		Value second = (Value) e.second_exp().accept(this, env);
-		return new Value.BoolVal(compareValue(first, second) > 0);
+		Value v1 = (Value) e.first_exp().accept(this, env);
+		Value v2 = (Value) e.second_exp().accept(this, env);
+
+		if(v1 instanceof AbstractVal || v2 instanceof AbstractVal)
+		{
+			HashSet<AbstractVal.Val> val = new HashSet<>();
+			val.add(AbstractVal.Val.BFalse);
+
+			if(v1 instanceof NumVal)
+			{
+				v1 = AbstractVal.ofValNum(v1);
+			}
+			else if(v1 instanceof BoolVal)
+			{
+				return new Value.AbstractVal(val);
+			}
+
+			if(v2 instanceof NumVal)
+			{
+				v2 = AbstractVal.ofValNum(v2);
+			}
+			else if(v2 instanceof BoolVal)
+			{
+				return new Value.AbstractVal(val);
+			}
+
+			//In case of one abstract val and the other not number or boolean
+			if(!(v1 instanceof AbstractVal && v2 instanceof AbstractVal))
+			{
+				return new Value.AbstractVal(val);
+			}
+
+			return AbstractVal.combine(((AbstractVal) v1), (AbstractVal) v2, AbstractVal::abstractGreater);
+		}
+
+		return new Value.BoolVal(compareValue(v1, v2) > 0);
 	}
 
 	@Override

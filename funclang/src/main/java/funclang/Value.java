@@ -36,24 +36,6 @@ public interface Value {
 			System.out.println(this.tostring());
 		}
 
-		boolean typeEqual(AbstractVal v2)
-		{
-			if((this._vals.contains(Val.NumZero) || this._vals.contains(Val.NumPos) || this._vals.contains(Val.NumNeg))
-					&& (v2._vals.contains(Val.NumZero) || v2._vals.contains(Val.NumPos) || v2._vals.contains(Val.NumNeg)))
-			{
-				//TODO how to compare
-				return true;
-			}
-			if((this._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue))
-					&& (v2._vals.contains(Val.BFalse) || this._vals.contains(Val.BTrue)))
-			{
-				//TODO how to compare
-				return true;
-			}
-			//TODO what to do if only contains error
-				return false;
-		}
-
 		public static AbstractVal combineArith(List<Value> vals, BiFunction<Val, Val, AbstractVal> f) {
 			AbstractVal result = null;
 			for (Value _val : vals) {
@@ -97,6 +79,41 @@ public interface Value {
 			return new AbstractVal(ret);
 		}
 
+		public static AbstractVal abstractGreater(Val s1, Val s2)
+		{
+			HashSet<Val> ret = new HashSet<>();
+			if(s1 == Val.NumPos)
+			{
+				if(s2 == Val.NumPos)
+				{
+					ret.add(Val.BFalse);
+					ret.add(Val.BTrue);
+				} else {
+					ret.add(Val.BTrue);
+				}
+			} else if (s1 == Val.NumZero) {
+				if(s2 == Val.NumNeg)
+				{
+					ret.add(Val.BTrue);
+				}
+				else {
+					ret.add(Val.BFalse);
+				}
+			} else if (s1 == Val.NumNeg) {
+				if(s2 == Val.NumNeg)
+				{
+					ret.add(Val.BFalse);
+					ret.add(Val.BTrue);
+				}
+				else {
+					ret.add(Val.BFalse);
+				}
+			}
+			else {
+				ret.add(Val.BFalse);
+			}
+			return new AbstractVal(ret);
+		}
 
 		public static AbstractVal abstractAdd(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();

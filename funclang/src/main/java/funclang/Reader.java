@@ -29,7 +29,7 @@ public class Reader {
 				ArrayList<String> x = new ArrayList<>();
 				HashSet <Value.AbstractVal.Val> vals = new HashSet<>();
 				if (line.startsWith("(abstract ")) {
-                    ArrayList<String> variables = new ArrayList<>(Arrays.asList(line.substring(10).split(" "))); //TODO Parse Better
+                    ArrayList<String> variables = new ArrayList<>(Arrays.asList(line.substring(10).split(" ")));
 					for(String s : variables) {
 						if (s.contains("(")) {
 							vals = new HashSet<>();
