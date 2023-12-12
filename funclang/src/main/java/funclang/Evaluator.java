@@ -190,7 +190,7 @@ public class Evaluator implements Visitor<Value> {
 				if (conditionA instanceof AbstractVal) {
 					ret._vals.addAll(((AbstractVal) conditionA)._vals);
 				} else if (conditionA instanceof  NumVal) {
-					ret._vals.addAll(AbstractVal.Val.ofNum(((NumVal) conditionA).v()));
+					ret._vals.addAll(AbstractVal.ofValNum(conditionA)._vals);
 				}
 			}
 			if (((AbstractVal) result)._vals.contains(AbstractVal.Val.BFalse)) {
@@ -198,7 +198,7 @@ public class Evaluator implements Visitor<Value> {
 				if (conditionB instanceof AbstractVal) {
 					ret._vals.addAll(((AbstractVal) conditionB)._vals);
 				} else if (conditionB instanceof  NumVal) {
-					ret._vals.addAll(AbstractVal.Val.ofNum(((NumVal) conditionB).v()));
+					ret._vals.addAll(AbstractVal.ofValNum(conditionB)._vals);
 				}
 			}
 			return ret;
