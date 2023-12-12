@@ -17,25 +17,55 @@ public interface Value {
 		).collect(Collectors.toList());
 	}
 
+	/**
+	 * The AbstractVal class represents abstract values and provides
+	 * operations on these values. It implements the Value interface.
+	 */
 	static class AbstractVal implements Value {
+
+		// HashSet to store abstract values
 		public HashSet<Val> _vals = new HashSet<>();
 
+		/**
+		 * Default constructor for AbstractVal.
+		 */
 		public AbstractVal() {}
 
+		/**
+		 * Constructor that initializes AbstractVal given a set of values.
+		 *
+		 * @param vals A HashSet of Val objects representing abstract values.
+		 */
 		public AbstractVal(HashSet<Val> vals) {
 			this._vals = vals;
 		}
 
+		/**
+		 * Returns a string representation of the abstract values.
+		 *
+		 * @return String representation of the abstract values.
+		 */
 		@Override
 		public String tostring() {
 			return _vals.toString();
 		}
 
+		/**
+		 * Prints the string representation of abstract values to the console.
+		 */
 		@Override
 		public void print() {
 			System.out.println(this.tostring());
 		}
 
+		/**
+		 * Combines a list of values using a binary function and returns the result
+		 * as an AbstractVal.
+		 *
+		 * @param vals List of Value objects to be combined.
+		 * @param f    Binary function for combination.
+		 * @return AbstractVal representing the combined values.
+		 */
 		public static AbstractVal combineArith(List<Value> vals, BiFunction<Val, Val, AbstractVal> f) {
 			AbstractVal result = null;
 			for (Value _val : vals) {
@@ -54,15 +84,26 @@ public interface Value {
 			return result;
 		}
 
+		/**
+		 * Combines two AbstractVal objects using binary function and returns the result.
+		 *
+		 * @param fst AbstractVal representing the first operand.
+		 * @param snd AbstractVal representing the second operand.
+		 * @param f   Binary function for combination.
+		 * @return Combined AbstractVal.
+		 */
 		public static AbstractVal combine(AbstractVal fst, AbstractVal snd, BiFunction<Val, Val, AbstractVal> f){
 			if (fst._vals.isEmpty()) {
 				return snd;
 			}
 			HashSet<Val> val = new HashSet<>();
+
+			// Handle errors
 			if (fst._vals.contains(Val.RuntimeError) || snd._vals.contains(Val.RuntimeError)) val.add(Val.RuntimeError);
 			if (fst._vals.contains(Val.TypeError) || snd._vals.contains(Val.TypeError)) val.add(Val.TypeError);
 			if (fst._vals.contains(Val.UnsupportedTypeError) || snd._vals.contains(Val.UnsupportedTypeError)) val.add(Val.UnsupportedTypeError);
 			if (fst._vals.contains(Val.UnsupportedFunctionError) || snd._vals.contains(Val.UnsupportedFunctionError)) val.add(Val.UnsupportedFunctionError);
+
 			for (Val va: fst._vals) {
 				for (Val vb: snd._vals) {
 					val.addAll(f.apply(va, vb)._vals);
@@ -71,6 +112,14 @@ public interface Value {
 			return new AbstractVal(val);
 		}
 
+		/**
+		 * Static utility method to create an AbstractVal representing the equality
+		 * of two values.
+		 *
+		 * @param s1 First value for comparison.
+		 * @param s2 Second value for comparison.
+		 * @return AbstractVal representing the equality result.
+		 */
 		public static AbstractVal abstractEqual(Val s1, Val s2)
 		{
 			HashSet<Val> ret = new HashSet<>();
@@ -79,6 +128,14 @@ public interface Value {
 			return new AbstractVal(ret);
 		}
 
+		/**
+		 * Static utility method to perform abstract greater-than comparison between
+		 * two values.
+		 *
+		 * @param s1 First value for comparison.
+		 * @param s2 Second value for comparison.
+		 * @return AbstractVal representing the greater-than result.
+		 */
 		public static AbstractVal abstractGreater(Val s1, Val s2)
 		{
 			HashSet<Val> ret = new HashSet<>();
@@ -115,6 +172,13 @@ public interface Value {
 			return new AbstractVal(ret);
 		}
 
+		/**
+		 * Static utility method to perform abstract addition operation between two values.
+		 *
+		 * @param s1 First value for addition.
+		 * @param s2 Second value for addition.
+		 * @return AbstractVal representing the addition result.
+		 */
 		public static AbstractVal abstractAdd(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
@@ -128,6 +192,14 @@ public interface Value {
 			}
 			return new AbstractVal(ret);
 		};
+
+		/**
+		 * Static utility method to perform abstract division operation between two values.
+		 *
+		 * @param s1 Numerator value.
+		 * @param s2 Denominator value.
+		 * @return AbstractVal representing the division result.
+		 */
 		public static AbstractVal abstractDiv(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
@@ -139,6 +211,13 @@ public interface Value {
 			return new AbstractVal(ret);
 		};
 
+		/**
+		 * Static utility method to perform abstract multiplication operation between two values.
+		 *
+		 * @param s1 First value for multiplication.
+		 * @param s2 Second value for multiplication.
+		 * @return AbstractVal representing the multiplication result.
+		 */
 		public static AbstractVal abstractMul(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
@@ -148,6 +227,14 @@ public interface Value {
 			else ret.add(Val.NumNeg);
 			return new AbstractVal(ret);
 		};
+
+		/**
+		 * Static utility method to perform abstract subtraction operation between two values.
+		 *
+		 * @param s1 Minuend value.
+		 * @param s2 Subtrahend value.
+		 * @return AbstractVal representing the subtraction result.
+		 */
 		public static AbstractVal abstractSub(Val s1, Val s2) {
 			HashSet<Val> ret = new HashSet<>();
 			if (s1 == Val.BTrue || s2 == Val.BTrue || s1 == Val.BFalse || s2 == Val.BFalse) ret.add(Val.TypeError);
@@ -163,6 +250,13 @@ public interface Value {
 			}
 			return new AbstractVal(ret);
 		};
+
+		/**
+		 * Static utility method to create an AbstractVal based on a numeric Value.
+		 *
+		 * @param v Numeric Value to be converted to an AbstractVal.
+		 * @return AbstractVal representing the numeric Value.
+		 */
 		public static AbstractVal ofValNum(Value v){
 			HashSet<Val> ret = new HashSet<>();
 			if (v instanceof NumVal) {
@@ -176,6 +270,13 @@ public interface Value {
 			}
 			return new AbstractVal(ret);
 		}
+
+		/**
+		 * Static utility method to create an AbstractVal based on a boolean Value.
+		 *
+		 * @param v Boolean Value to be converted to an AbstractVal.
+		 * @return AbstractVal representing the boolean Value.
+		 */
 		public static AbstractVal ofValBool(Value v) {
 			HashSet<Val> ret = new HashSet<>();
 			if (v instanceof BoolVal) {
@@ -187,6 +288,12 @@ public interface Value {
 			}
 			return new AbstractVal(ret);
 		}
+
+		/**
+		 * Static utility method to create an AbstractVal representing any numeric value.
+		 *
+		 * @return AbstractVal representing any numeric value (NumPos, NumZero, NumNeg).
+		 */
 		public static AbstractVal anyNum(){
 			HashSet<Val> ret = new HashSet<>();
 			ret.add(Val.NumPos);
@@ -194,6 +301,12 @@ public interface Value {
 			ret.add(Val.NumNeg);
 			return new AbstractVal(ret);
 		}
+
+		/**
+		 * Static utility method to create an AbstractVal representing any boolean value.
+		 *
+		 * @return AbstractVal representing any boolean value (BTrue, BFalse).
+		 */
 		public static AbstractVal anyBool(){
 			HashSet<Val> ret = new HashSet<>();
 			ret.add(Val.BTrue);
@@ -201,6 +314,9 @@ public interface Value {
 			return new AbstractVal(ret);
 		}
 
+		/**
+		 * Enumeration representing different types of abstract values.
+		 */
 		public enum Val {
 			TypeError,
 			UnsupportedFunctionError,
