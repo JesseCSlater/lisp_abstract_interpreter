@@ -327,39 +327,6 @@ public interface Value {
 			NumNeg,
 			BTrue,
 			BFalse;
-			static HashSet<Val> ofNum(double num){
-				HashSet<Val> ret = new HashSet<>();
-				if (num < 0) ret.add(NumNeg);
-				if (num > 0) ret.add(NumPos);
-				if (num == 0) ret.add(NumZero);
-				return ret;
-			}
-			public static HashSet<Val> ofBool(boolean bool){
-				HashSet<Val> ret = new HashSet<>();
-				if (bool) ret.add(BTrue);
-				else ret.add(BFalse);
-				return ret;
-			}
-			public HashSet<Val> typeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(TypeError);
-				return ret;
-			}
-			public HashSet<Val> unsupportedFunctionError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(UnsupportedFunctionError);
-				return ret;
-			}
-			public HashSet<Val> unsupportedTypeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(TypeError);
-				return ret;
-			}
-			public HashSet<Val> runtimeError(){
-				HashSet<Val> ret = new HashSet<>();
-				ret.add(RuntimeError);
-				return ret;
-			}
 		}
 	}
 
