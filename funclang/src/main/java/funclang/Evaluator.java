@@ -19,6 +19,14 @@ public class Evaluator implements Visitor<Value> {
 			return (Value) p.accept(this, initEnv);
 	}
 
+	/**
+	 * Visits an addition expression node in the AST and performs the
+	 * addition operation on the values of the subexpressions.
+	 *
+	 * @param e   The addition expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the addition expression evaluation.
+	 */
 	@Override
 	public Value visit(AddExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
@@ -55,6 +63,14 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(e.v());
 	}
 
+	/**
+	 * Visits a division expression node in the AST and performs the
+	 * division operation on the values of the subexpressions.
+	 *
+	 * @param e   The division expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the division expression evaluation.
+	 */
 	@Override
 	public Value visit(DivExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
@@ -72,6 +88,14 @@ public class Evaluator implements Visitor<Value> {
 		return new NumVal(result);
 	}
 
+	/**
+	 * Visits a multiplication expression node in the AST and performs the
+	 * multiplication operation on the values of the subexpressions.
+	 *
+	 * @param e   The multiplication expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the multiplication expression evaluation.
+	 */
 	@Override
 	public Value visit(MultExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
@@ -99,6 +123,14 @@ public class Evaluator implements Visitor<Value> {
 		}
 	}
 
+	/**
+	 * Visits a subtraction expression node in the AST and performs the
+	 * subtraction operation on the values of the subexpressions.
+	 *
+	 * @param e   The subtraction expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the subtraction expression evaluation.
+	 */
 	@Override
 	public Value visit(SubExp e, Env env) {
 		List<Value> values = Value.acceptAll(e.all(), this, env);
@@ -175,7 +207,14 @@ public class Evaluator implements Visitor<Value> {
 		return (Value) operator.body().accept(this, fun_env);
 	}
 
-	//TODO abstract interpretation of if
+	/**
+	 * Visits an if expression node in the AST and evaluates the conditional
+	 * expression to decide which branch to execute.
+	 *
+	 * @param e   The if expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the if expression evaluation.
+	 */
 	@Override
 	public Value visit(IfExp e, Env env) { // New for funclang.
 		Object result = e.conditional().accept(this, env);
@@ -266,6 +305,14 @@ public class Evaluator implements Visitor<Value> {
 		return -1;
 	}
 
+	/**
+	 * Visits a less-than expression node in the AST and compares the values
+	 * of the two subexpressions to determine if the first is less than the second.
+	 *
+	 * @param e   The less-than expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the less-than expression evaluation.
+	 */
 	@Override //NOTE: in less than without abstract non-matching defaults to -1 so
 			  // less than will return true. There is also unexpected behaviour with boolean values
 			  //with abstract this will return false
@@ -308,6 +355,14 @@ public class Evaluator implements Visitor<Value> {
 		return new Value.BoolVal(compareValue(v1, v2) < 0);
 	}
 
+	/**
+	 * Visits an equality expression node in the AST and checks whether the values
+	 * of the two subexpressions are equal.
+	 *
+	 * @param e   The equality expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the equality expression evaluation.
+	 */
 	@Override
 	public Value visit(EqualExp e, Env env) { // New for funclang.
 		Value v1 = (Value) e.first_exp().accept(this, env);
@@ -347,6 +402,14 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(equalValue(v1, v2));
 	}
 
+	/**
+	 * Visits a greater-than expression node in the AST and compares the values
+	 * of the two subexpressions to determine if the first is greater than the second.
+	 *
+	 * @param e   The greater-than expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the greater-than expression evaluation.
+	 */
 	@Override
 	public Value visit(GreaterExp e, Env env) { // New for funclang.
 		Value v1 = (Value) e.first_exp().accept(this, env);
@@ -430,6 +493,14 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(val instanceof Value.Null);
 	}
 
+	/**
+	 * Visits a numeric expression node in the AST and evaluates whether the
+	 * provided expression's result is a numeric value or an abstract numeric value.
+	 *
+	 * @param e   The numeric expression AST node.
+	 * @param env The current environment during the evaluation.
+	 * @return    The result of the numeric expression evaluation.
+	 */
 	@Override
 	public Value visit(IsNumExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
@@ -447,6 +518,15 @@ public class Evaluator implements Visitor<Value> {
 		}
 		return new BoolVal(val instanceof Value.NumVal);
 	}
+
+	/**
+	 * Visits a boolean expression node in the AST and evaluates whether the
+	 * provided expression's result is a boolean value or an abstract boolean value.
+	 *
+	 * @param e   The boolean expression AST node.
+	 * @param env The current enviroment during the evaluation.
+	 * @return	  The result of the boolean expression evaluation.
+	 */
 	@Override
 	public Value visit(IsBoolExp e, Env env) {
 		Value val = (Value) e.arg().accept(this, env);
@@ -521,7 +601,13 @@ public class Evaluator implements Visitor<Value> {
 		}
 	}
 
-
+	/**
+	 * Sets up the abstract environment by extending the global enviroment with
+	 * the provided list of variable names and corresponding values.
+	 *
+	 * @param abstractEnv List of variable names to be added to the enviroment.
+	 * @param EnvVariable List of corresponding values for the variables.
+	 */
 	public void setAbstractEnv(ArrayList<String> abstractEnv, ArrayList<Value> EnvVariable) {
 		for (int i = 0; i < abstractEnv.size(); i++) {
 			((GlobalEnv) initEnv).extend(abstractEnv.get(i), EnvVariable.get(i));
