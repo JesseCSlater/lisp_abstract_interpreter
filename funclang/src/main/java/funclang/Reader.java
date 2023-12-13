@@ -12,8 +12,18 @@ import funclang.AST.Program;
 import funclang.parser.FuncLangLexer;
 import funclang.parser.FuncLangParser;
 
+/**
+ * The Reader class reads input programs, parses them, and extracts abstract information.
+ */
 public class Reader {
-	
+
+	/**
+	 * Reads input from the user, processes it, and returns a Ret object containing
+	 * the parsed program and abstract information.
+	 *
+	 * @return Ret object containing parsed program and abstract information.
+	 * @throws IOException if an I/O error occurs.
+	 */
 	Ret read() throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.print("$ ");
@@ -28,6 +38,8 @@ public class Reader {
 				String line = brf.readLine();
 				ArrayList<String> x = new ArrayList<>();
 				HashSet <Value.AbstractVal.Val> vals = new HashSet<>();
+
+				// Parses scm abstractly and defines specified variables.
 				if (line.startsWith("(abstract ")) {
                     ArrayList<String> variables = new ArrayList<>(Arrays.asList(line.substring(10).split(" ")));
 					for(String s : variables) {
@@ -62,6 +74,12 @@ public class Reader {
 		return new Ret(parse(programText), abstractEnv, abstractVal);
 	}
 
+	/**
+	 * Selects the corresponding enum value based on the provided string.
+	 *
+	 * @param s The input string to map to an enum value.
+	 * @return The corresponding enum value, or UnsupportedTypeError if not found.
+	 */
 	private Value.AbstractVal.Val selectEnum(String s)
 	{
 		for(Value.AbstractVal.Val v : Value.AbstractVal.Val.values())
@@ -98,11 +116,21 @@ public class Reader {
 		}
 	}
 
+	/**
+	 * The Ret class holds the parsed program and abstract information.
+	 */
 	public static class Ret {
 		public Program p;
 		public ArrayList<String> abstractEnv;
 		public ArrayList<Value> abstractVal;
 
+		/**
+		 * Constructs a Ret object with the given parameters.
+		 *
+		 * @param p	          The parsed Program object.
+		 * @param abstractEnv The list of abstract environment variables.
+		 * @param abstractVal The list of abstract values.
+		 */
 		public Ret(Program p, ArrayList<String> abstractEnv, ArrayList<Value> abstractVal) {
 			this.p = p;
 			this.abstractEnv = abstractEnv;
