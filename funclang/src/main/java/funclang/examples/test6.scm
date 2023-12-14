@@ -1,4 +1,5 @@
-(abstract (n NumPos) (b BTrue) (a NumPos BTrue))
+(abstract (n BTrue))
 
 (= n #t)
 
+//Expected Result: [BTrue]

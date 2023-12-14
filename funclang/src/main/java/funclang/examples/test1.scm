@@ -1,3 +1,5 @@
 (abstract (x NumPos NumNeg))
 
-(if (= x -1) (+ x -1) (/ x 0))
+(+ x 5)
+
+//Expected Result: [NumPos, NumZero, NumNeg]

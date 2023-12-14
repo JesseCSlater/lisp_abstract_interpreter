@@ -1,3 +1,5 @@
-(abstract (x NumNeg) (y NumPos) (z BTrue))
+(abstract (x NumPos NumNeg) (y NumZero))
 
-(+ 2 z)
+(* x (+ y 3))
+
+//Expected Result: [NumPos, NumNeg]

@@ -2,8 +2,10 @@
 
 (define add1
   (lambda (a)
-      (+ a 1)
-    )
+    (+ a 1)
   )
+)
 
 (add1 x)
+
+//Expected Result: [NumPos, NumNeg, NumZero]

@@ -1,9 +1,5 @@
-(abstract (x NumNeg) (y NumPos))
+(abstract (x NumPos NumZero))
 
-(+
-  (/
-    3
-    (+ x y)
-    )
-  0
-  )
+(if (> x -1) (* x 2) (- x x))
+
+//Expected Result: [NumPos, NumZero]
